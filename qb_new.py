@@ -1,5 +1,12 @@
 # coding=utf-8
 # Created By Xushier  QQ:1575659493
+'''
+cron: 0 * * * *
+new Env('自动删除QB种子');
+export QBENV="第1个cookie&第2个cookie"
+'''
+
+
 
 # 引入要使用的库
 import requests,json,time,re,sys,logging

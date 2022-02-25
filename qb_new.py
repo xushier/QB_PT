@@ -1,5 +1,9 @@
 # coding=utf-8
 # Created By Xushier  QQ:1575659493
+"""
+cron: 8 8 * * *
+new Env('QB自动删种');
+"""
 
 # 引入要使用的库
 import requests,json,time,re,sys,logging

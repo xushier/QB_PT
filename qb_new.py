@@ -1,9 +1,16 @@
 # coding=utf-8
 # Created By Xushier  QQ:1575659493
+
 '''
+定时
 cron: 0 * * * *
+任务名称
 new Env('自动删除QB种子');
+
+变量
 export QBENV="第1个cookie&第2个cookie"
+脚本内使用变量
+print(os.environ['ZNS'])
 '''
 
 
@@ -29,12 +36,12 @@ ReqTimes = 3
 #----------------变量-----------------#
 # QB 的连接协议、地址、端口、用户名和密码
 QBProtocol  = 'http'
-QBAddress   = 'xushier.cf'
-QBPort      = '8080'
-UserName    = 'xushier'
-PassWord    = 'xushier666'
-# PushPlus 推送的 Token
-PushPlus	= '08dc2406fc484d789406b2f4aa794abf'
+QBAddress   = 'IP or domain'
+QBPort      = 'port'
+UserName    = 'username'
+PassWord    = 'password'
+# PushPlus 推送的 Token，获取：http://pushplus.plus
+PushPlus	= 'token'
 # 添加种子的重试次数
 retryTimes  = 3
 

@@ -1,9 +1,5 @@
 # coding=utf-8
 # Created By Xushier  QQ:1575659493
-"""
-cron: 8 8 * * *
-new Env('QB自动删种');
-"""
 
 # 引入要使用的库
 import requests,json,time,re,sys,logging
@@ -49,10 +45,6 @@ reannounceURL = baseURL + '/api/v2/torrents/reannounce'
 maindataURL   = baseURL + '/api/v2/sync/maindata'
 transferURL   = baseURL + '/api/v2/transfer/info'
 # 日志记录
-log           = Logger(file_name='run.log', level='info', when='D', backCount=5, interval=1)
-
-#################结束##################
-#######################################
 
 
 class Logger(object):
@@ -81,6 +73,13 @@ class Logger(object):
 		}
 		str = str.lower()
 		return level.get(str)
+
+
+log           = Logger(file_name='run.log', level='info', when='D', backCount=5, interval=1)
+
+#################结束##################
+#######################################
+
 
 
 

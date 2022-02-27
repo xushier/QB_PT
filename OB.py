@@ -22,7 +22,7 @@ from qbittorrent import Client
 ######################################
 ###############全局变量################
 
-qb_url   = os.environ['Qqb_url']
+qb_url   = os.environ['qb_url']
 username = os.environ['username']
 password = os.environ['password']
 

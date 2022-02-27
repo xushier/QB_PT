@@ -15,9 +15,9 @@ print(os.environ['ZNS'])
 '''
 
 import re,requests,time,os,sys
-from _notify import SendNotify
-from _logger import Logger
-from _qbittorrent import Client
+from notify import SendNotify
+from logger import Logger
+from qbittorrent import Client
 
 ######################################
 ###############全局变量################

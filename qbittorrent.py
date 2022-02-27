@@ -1,3 +1,12 @@
+# coding=utf-8
+
+'''
+变量
+export 
+export RSS
+脚本内使用变量
+print(os.environ['ZNS'])
+'''
 
 from logger import Logger
 import requests,json,time,sys
@@ -15,7 +24,7 @@ class LoginRequired(Exception):
 
 class Client(object):
     """class to interact with qBittorrent WEB API"""
-    def __init__(self, url='http://xushier.cf:8080', username='xushier', password='xushier666', log_file_name='run.log', verify=False, timeout=(3.05,20)):
+    def __init__(self, url:str, username:str, password:str, log_file_name='run.log', verify=False, timeout=(3.05,20)):
         """
         Initialize the client
 

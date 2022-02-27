@@ -22,6 +22,10 @@ from qbittorrent import Client
 ######################################
 ###############全局变量################
 
+qb_url   = os.environ['QB地址']
+username = os.environ['用户名']
+password = os.environ['密码']
+
 ###############订阅参数################
 cookie  = os.environ['CK']
 rss_url = os.environ['RSS']
@@ -84,7 +88,7 @@ class HDHome(object):
             'Referer': self.base_url,
             'Cookie': self.cookie
         }
-        self.qbittorrent  = Client()
+        self.qbittorrent  = Client(qb_url, username, password)
         self.send_notify  = SendNotify(pushplus_token)
 
         self.min_size    = min_size

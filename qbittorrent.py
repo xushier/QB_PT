@@ -265,7 +265,7 @@ class Client(object):
         else:
             return str(round(bytes / 1048576, 2))
 
-    def bytes_to_gbytes(self, bytes, return_type='float') -> (float | str):
+    def bytes_to_gbytes(self, bytes, return_type='float'):
         """
         Download torrent using a link.
 

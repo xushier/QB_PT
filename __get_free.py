@@ -112,13 +112,13 @@ class Get_Free(object):
             past_time = round(time.time() - os.path.getmtime(temp_file))
             self.log.info("文件存在，距上次运行已过 {} 秒".format(past_time))
             if past_time <= rss_time*60:
-                self.log.info("使用正常模式\n")
+                self.log.info("使用正常模式")
                 mode = 0
             else:
-                self.log.info("时间过久，使用初始运行模式\n")
+                self.log.info("时间过久，使用初始运行模式")
                 mode = 1
         else:
-            self.log.info("文件不存在，使用初始运行模式\n")
+            self.log.info("文件不存在，使用初始运行模式")
             mode = 1
 
         if mode:
@@ -129,7 +129,7 @@ class Get_Free(object):
             url_dl_list.sort(key = lambda i:int(re.search(r'id=(\d+)', i).group(1)))
             with open(temp_file, "w+") as f:
                 f.writelines(url_dl_list)
-            self.log.info("已记录，退出\n")
+            self.log.info("已记录，退出")
             sys.exit(0)
 
         with open(temp_file) as f:

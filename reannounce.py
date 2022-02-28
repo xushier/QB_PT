@@ -25,6 +25,9 @@ except KeyError:
     print("请检查 qb_url username password 变量是否设置！")
     sys.exit(1)
 if __name__ == '__main__':
-    qb = Client(qb_url, username, password)
-    torrents = qb.filter_torrents(filter='all', limit=15, sorted='added_on', reverse=True)
-    qb.reannounce(torrents)
+    qb        = Client(qb_url, username, password)
+    torrents  = qb.filter_torrents(filter='all', limit=15, sorted='added_on', reverse=True)
+    info_hash = []
+    for torrent in torrents:
+        info_hash.append(torrent['hash'])
+    qb.reannounce(info_hash)

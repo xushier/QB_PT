@@ -208,5 +208,4 @@ class Get_Free(object):
             return(free_list)
         else:
             self.log.info("没有符合条件的种子")
-            self.send_notify.pushplus('开始RSS订阅','没有符合条件的种子')
             sys.exit(0)

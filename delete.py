@@ -3,7 +3,7 @@
 
 '''
 定时
-cron: 0 0/60 * * *
+cron: 30 0/60 * * * *
 任务名称
 new Env('删种');
 
@@ -29,6 +29,3 @@ if __name__ == '__main__':
     qb = Client(qb_url, username, password)
     torrents = qb.get_satisfied_torrents()
     qb.delete(torrents)
-        
-    
-

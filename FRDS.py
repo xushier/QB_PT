@@ -3,7 +3,7 @@
 
 '''
 定时
-cron: 0 0/3 * * *
+cron: 0 0/3 * * * *
 任务名称
 new Env('KeepFRDS 刷流');
 

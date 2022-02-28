@@ -32,8 +32,8 @@ username = os.environ['username']
 password = os.environ['password']
 
 ###############订阅参数################
-cookie  = os.environ['CK']
-rss_url = os.environ['RSS']
+cookie  = os.environ['ob_cookie']
+rss_url = os.environ['ob_rssurl']
 
 # Rss 间隔检测时间
 rss_time  = 3

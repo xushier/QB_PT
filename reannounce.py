@@ -30,4 +30,4 @@ if __name__ == '__main__':
     info_hash = []
     for torrent in torrents:
         info_hash.append(torrent['hash'])
-    qb.reannounce(info_hash)
+    print(qb.reannounce(info_hash))

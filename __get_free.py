@@ -111,7 +111,7 @@ class Get_Free(object):
         if os.path.isfile(temp_file):
             past_time = round(time.time() - os.path.getmtime(temp_file))
             self.log.info("文件存在，距上次运行已过 {} 秒".format(past_time))
-            if past_time <= rss_time*60:
+            if past_time <= (rss_time +1)*60:
                 self.log.info("使用正常模式")
                 mode = 0
             else:

@@ -6,12 +6,16 @@ from __notifier import SendNotify
 import requests,json,time,sys,os
 
 ############### QB参数################
-qb_url   = os.environ['qb_url']
-username = os.environ['username']
-password = os.environ['password']
+try:
+    qb_url   = os.environ['qb_url']
+    username = os.environ['username']
+    password = os.environ['password']
 
 ###############通知参数################
-pushplus_token = os.environ['pushplus']
+    pushplus_token = os.environ['pushplus']
+except KeyError:
+    print("未设置变量！")
+    sys.exit(1)
 
 ###############其他参数################
 filter_filter  = 'all'

@@ -25,16 +25,18 @@ from __qbittorrent import Client
 
 ######################################
 ###############全局变量################
-
+try:
 ############### QB参数################
-qb_url   = os.environ['qb_url']
-username = os.environ['username']
-password = os.environ['password']
+    qb_url   = os.environ['qb_url']
+    username = os.environ['username']
+    password = os.environ['password']
 
 ###############订阅参数################
-cookie  = os.environ['ob_cookie']
-rss_url = os.environ['ob_rssurl']
-
+    cookie  = os.environ['ob_cookie']
+    rss_url = os.environ['ob_rssurl']
+except KeyError:
+    print("未设置变量！")
+    sys.exit(1)
 # Rss 间隔检测时间
 rss_time  = 3
 

@@ -14,19 +14,21 @@ export password
 '''
 
 from __qbittorrent import Client
-import os
+import os,sys
 
 ############### QB参数################
-qb_url   = os.environ['qb_url']
-username = os.environ['username']
-password = os.environ['password']
+try:
+    qb_url   = os.environ['qb_url']
+    username = os.environ['username']
+    password = os.environ['password']
+except KeyError:
+    print("未设置变量！")
+    sys.exit(1)
 
 if __name__ == '__main__':
-    try:
-        qb = Client(qb_url, username, password)
-        torrents = qb.get_satisfied_torrents()
-        qb.delete(torrents)
-    except KeyError:
-        print("未设置变量！")
+    qb = Client(qb_url, username, password)
+    torrents = qb.get_satisfied_torrents()
+    qb.delete(torrents)
+        
     
 

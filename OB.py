@@ -110,7 +110,11 @@ class HDHome(object):
         self.rss_time    = rss_time*60
 
         session = requests.Session()
-        login   = session.post(self.base_url, verify=self.verify, timeout=self.timeout, headers=self.host_referer)
+        try:
+            login   = session.post(self.base_url, verify=self.verify, timeout=self.timeout, headers=self.host_referer)
+        except KeyError:
+            self.log.warning("环境变量未设置！")
+            sys.exit(1)
         if re.search('login.php', login.text):
             self.log.warning("登录已失效，请更新Cookie！")
             self.send_notify.pushplus('OB','登录已失效，请更新Cookie！')

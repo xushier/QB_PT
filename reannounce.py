@@ -22,6 +22,9 @@ username = os.environ['username']
 password = os.environ['password']
 
 if __name__ == '__main__':
-    qb = Client(qb_url, username, password)
-    torrents = qb.filter_torrents(filter='all', limit=15, sorted='added_on', reverse=True)
-    qb.reannounce(torrents)
+    try:
+        qb = Client(qb_url, username, password)
+        torrents = qb.filter_torrents(filter='all', limit=15, sorted='added_on', reverse=True)
+        qb.reannounce(torrents)
+    except KeyError:
+        print("变量未设置！")

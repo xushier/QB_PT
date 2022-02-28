@@ -22,8 +22,11 @@ username = os.environ['username']
 password = os.environ['password']
 
 if __name__ == '__main__':
-    qb = Client(qb_url, username, password)
-    torrents = qb.get_satisfied_torrents()
-    qb.delete(torrents)
+    try:
+        qb = Client(qb_url, username, password)
+        torrents = qb.get_satisfied_torrents()
+        qb.delete(torrents)
+    except KeyError:
+        print("未设置变量！")
     
 

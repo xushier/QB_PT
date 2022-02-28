@@ -19,7 +19,7 @@ class SendNotify(object):
                 self.log.info("通知发送成功！")
             else:
                 self.log.warning("通知发送失败！")
-        else：
+        else:
             self.log.warning("pushplus token 未设置！")
 
 

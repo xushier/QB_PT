@@ -5,7 +5,7 @@
 定时
 cron: 0 0/3 * * *
 任务名称
-new Env('获取 HDSky 指定种子');
+new Env('HDSky 刷流');
 
 变量
 export hdsky_cookie=""

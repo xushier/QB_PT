@@ -5,7 +5,7 @@
 定时
 cron: 0 0/60 * * *
 任务名称
-new Env('删除指定种子');
+new Env('删种');
 
 变量
 export qb_url=""

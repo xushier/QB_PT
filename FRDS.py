@@ -5,7 +5,7 @@
 定时
 cron: 0 0/3 * * *
 任务名称
-new Env('获取 KeepFRDS 指定种子');
+new Env('KeepFRDS 刷流');
 
 变量
 export keepfrds_cookie=""

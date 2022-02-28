@@ -5,7 +5,7 @@
 定时
 cron: 0 0/3 * * *
 任务名称
-new Env('获取 HDHome 指定种子');
+new Env('HDHome 刷流');
 
 变量
 export hdhome_cookie=""

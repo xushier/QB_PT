@@ -3,25 +3,30 @@
 
 '''
 定时
-cron: 0 * * * *
+cron: 0 0/3 * * *
 任务名称
-new Env('获取指定种子');
+new Env('获取 OB 指定种子');
 
 变量
 export CK
 export RSS
-脚本内使用变量
-print(os.environ['ZNS'])
+
+export qb_url
+export username
+export password
+
+export pushplus_token
 '''
 
 import re,requests,time,os,sys
-from notifier import SendNotify
-from logger import Logger
-from qbittorrent import Client
+from __notifier import SendNotify
+from __logger import Logger
+from __qbittorrent import Client
 
 ######################################
 ###############全局变量################
 
+############### QB参数################
 qb_url   = os.environ['qb_url']
 username = os.environ['username']
 password = os.environ['password']
@@ -30,14 +35,13 @@ password = os.environ['password']
 cookie  = os.environ['CK']
 rss_url = os.environ['RSS']
 
-
-# Rss 间隔检测时间依据
-rss_time   = 180
+# Rss 间隔检测时间
+rss_time  = 3
 
 ###############加种参数################
 up_limit  = 50
 save_path = '/downloads/OB'
-category = 'OB'
+category  = 'OB'
 
 ###############日志参数################
 temp_file = "OB_Temp.log"
@@ -47,21 +51,25 @@ log_level = "info"
 ###############过滤参数################
 min_size    = 15
 max_size    = 800
+
 filter_free = 1
 filter_hr   = 1
 filter_old  = 1
-allow_time  = 600
+
+allow_time  = 10
 rss_nums    = 10
 delay       = 1
 
-###############其他参数################
-pushplus_token = '08dc2406fc484d789406b2f4aa794abf'
+###############通知参数################
+pushplus_token = os.environ['pushplus']
 
 #######################################
 ###############全局变量################
 
+
+
 class HDHome(object):
-    def __init__(self, cookie=cookie, rss_url=rss_url, verify=True, timeout=(5.05,20), ) -> None:
+    def __init__(self, cookie=cookie, rss_url=rss_url, verify=True, timeout=(5.05,20)) -> None:
         self.cookie       = cookie
         self.rss_url      = rss_url
         self.verify       = verify
@@ -88,8 +96,8 @@ class HDHome(object):
             'Referer': self.base_url,
             'Cookie': self.cookie
         }
-        self.qbittorrent  = Client(qb_url, username, password)
-        self.send_notify  = SendNotify(pushplus_token)
+        self.qbittorrent = Client(qb_url, username, password)
+        self.send_notify = SendNotify(pushplus_token)
 
         self.min_size    = min_size
         self.max_size    = max_size
@@ -98,6 +106,8 @@ class HDHome(object):
         self.filter_old  = filter_old
         self.delay       = delay
         self.rss_nums    = rss_nums
+        self.allow_time  = allow_time*60
+        self.rss_time    = rss_time*60
 
         session = requests.Session()
         login   = session.post(self.base_url, verify=self.verify, timeout=self.timeout, headers=self.host_referer)
@@ -136,7 +146,7 @@ class HDHome(object):
         if os.path.isfile(temp_file):
             past_time = round(time.time() - os.path.getmtime(temp_file))
             self.log.info("文件存在，距上次运行已过 {} 秒".format(past_time))
-            if past_time <= rss_time:
+            if past_time <= self.rss_time:
                 self.log.info("使用正常模式\n")
                 mode = 0
             else:
@@ -237,10 +247,6 @@ class HDHome(object):
             sys.exit(0)
 
 
-HDHome().get_free_torrents()
-
-
-
-
-
-
+if __name__ == '__main__':
+    torernts = HDHome().get_free_torrents()
+    HDHome().qbittorrent.add_torrents_from_link(torernts, up_limit, save_path, category)

@@ -1,22 +1,25 @@
 # coding=utf-8
+# Created By Xushier  QQ:1575659493
 
-'''
-变量
-export 
-export RSS
-脚本内使用变量
-print(os.environ['ZNS'])
-'''
+from __logger import Logger
+from __notifier import SendNotify
+import requests,json,time,sys,os
 
-from logger import Logger
-import requests,json,time,sys
+############### QB参数################
+qb_url   = os.environ['qb_url']
+username = os.environ['username']
+password = os.environ['password']
 
-filter_filter = 'all'
-filter_limit = 5
-filter_sort = 'added_on'
+###############通知参数################
+pushplus_token = os.environ['pushplus']
+
+###############其他参数################
+filter_filter  = 'all'
+filter_limit   = 5
+filter_sort    = 'added_on'
 filter_reverse = 'False'
-delay = 1
-req_times = 3 
+delay          = 1
+req_times      = 5
 
 class LoginRequired(Exception):
     def __str__(self):
@@ -24,7 +27,7 @@ class LoginRequired(Exception):
 
 class Client(object):
     """class to interact with qBittorrent WEB API"""
-    def __init__(self, url:str, username:str, password:str, log_file_name='run.log', verify=False, timeout=(3.05,20)):
+    def __init__(self, url=qb_url, username=username, password=password, log_file_name='run.log', verify=False, timeout=(3.05,20)):
         """
         Initialize the client
 
@@ -43,6 +46,7 @@ class Client(object):
         self.timeout  = timeout
         self.username = username
         self.password = password
+        self.send_notify = SendNotify(pushplus_token)
         self.log = Logger(file_name=log_file_name, level='info', when='D', backCount=5, interval=1)
 
         session = requests.session()
@@ -209,7 +213,7 @@ class Client(object):
         data = self._process_infohash_list(infohash_list)
         return self._post('torrents/reannounce', data=data)
 
-    def delete(self, infohash_list, delete_files=False):
+    def delete(self, infohash_list, delete_files=True):
         """
         Delete torrents.
 
@@ -274,7 +278,7 @@ class Client(object):
         else:
             return str(round(bytes / 1048576, 2))
 
-    def bytes_to_gbytes(self, bytes, return_type='float'):
+    def bytes_to_gbytes(self, bytes, return_type='float') -> (float | str):
         """
         Download torrent using a link.
 
@@ -339,29 +343,6 @@ class Client(object):
         else:
             struct_time = time.strptime(date, input_format)
             return time.strftime(return_format, struct_time)
-
-    def send_notify(self, title:str, content:str, pushplus=1,wechat=0):
-        """
-        Download torrent using a link.
-
-        :param link: URL Link or list of.
-        :param savepath: Path to download the torrent.
-        :param category: Label or Category of the torrent(s).
-
-        :return: Empty JSON data.
-        """
-        pushplus_token = ''
-        if pushplus:
-            pushplus_url     = 'http://www.pushplus.plus/send?token=' + pushplus_token + '&title=' + title + '&content=' + content
-            pushplus_headers = {'Content-Type':'application/json'}
-            pushplus_url_req = requests.get(pushplus_url, headers=pushplus_headers)
-            if pushplus_url_req.status_code == 200:
-                pass
-            else:
-                pass
-        
-        if wechat:
-            pass
     
     @property
     def global_transfer_info(self):
@@ -438,10 +419,10 @@ class Client(object):
                 t_compon    = self.timestamp_to_date(h['completion_date'])
                 notify_data = notify_data + "删除 - 添加于：{} - 大小：{} GB - 已上传：{} GB - 分享率：{} - 完成于：{} - 做种时间：{}小时\n".format(t_addon,t_size,t_uploaded,t_ratio,t_compon,t_seedtime)
                 time.sleep(delay)
-            self.send_notify("删种结果", notify_data)
+            self.send_notify.pushplus("删种结果", notify_data)
             self.log.info(final_hashes)
             return list(final_hashes)
         else:
             self.log.info("没有符合条件的种子，无需删除")
-            self.send_notify("删种结果","没有满足删种条件的种子")
+            self.send_notify.pushplus("删种结果","没有满足删种条件的种子")
             sys.exit(0)

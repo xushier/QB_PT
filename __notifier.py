@@ -1,6 +1,7 @@
 # coding=utf-8
+# Created By Xushier  QQ:1575659493
 
-from logger import Logger
+from __logger import Logger
 import requests
 
 class SendNotify(object):
@@ -12,8 +13,6 @@ class SendNotify(object):
 
     def pushplus(self, title:str, content:str) -> None:
         pushplus_headers = {'Content-Type':'application/json'}
-        # pushplus_data    = {'token': self.token, 'title': title, 'content': content}
-        # pushplus_req     = requests.post(self.url, data=pushplus_data, headers=pushplus_headers)
         pushplus_req = requests.get(self.url+'&title='+title+'&content='+content,headers=pushplus_headers)
         if pushplus_req.status_code == 200:
             self.log.info("通知发送成功！")

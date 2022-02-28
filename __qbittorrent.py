@@ -429,7 +429,7 @@ class Client(object):
                 t_seedtime  = round(h['seeding_time'] / 3600, 2)
                 t_addon     = self.timestamp_to_date(h['addition_date'])
                 t_compon    = self.timestamp_to_date(h['completion_date'])
-                notify_data = notify_data + "删除 - 添加于：{} - 大小：{} GB - 已上传：{} GB - 分享率：{} - 完成于：{} - 做种时间：{}小时\n\n".format(t_addon,t_size,t_uploaded,t_ratio,t_compon,t_seedtime)
+                notify_data = notify_data + "删除 - 添加于：{} - 大小：{} GB - 已上传：{} GB - 分享率：{} - 做种时间：{}小时 - 完成于：{}\n\n".format(t_addon,t_size,t_uploaded,t_ratio,t_seedtime,t_compon)
                 time.sleep(delay)
             self.send_notify.pushplus("删种结果", notify_data)
             self.log.info(final_hashes)

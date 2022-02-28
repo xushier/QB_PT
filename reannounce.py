@@ -8,9 +8,9 @@ cron: 0 0/5 * * *
 new Env('重新汇报最新的 15 个种子');
 
 变量
-export qb_url
-export username
-export password
+export qb_url=""
+export username=""
+export password=""
 '''
 
 from __qbittorrent import Client

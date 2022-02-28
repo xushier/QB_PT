@@ -3,10 +3,10 @@
 
 '''
 变量
-export qb_url
-export username
-export password
-export pushplus_token
+export qb_url=""
+export username=""
+export password=""
+export pushplus_token=""
 '''
 
 import re,requests,time,os,sys
@@ -22,7 +22,7 @@ try:
     qb_url         = os.environ['qb_url']
     username       = os.environ['username']
     password       = os.environ['password']
-    pushplus_token = os.environ['pushplus']
+    pushplus_token = os.environ['pushplus_token']
 except KeyError:
     print("请检查 qb_url username password pushplus 变量是否设置！")
     sys.exit(1)
@@ -33,7 +33,11 @@ except KeyError:
 
 
 class Get_Free(object):
-    def __init__(self, cookie:str, rss_url:str, log_file:str, log_level='info', verify=True, timeout=(5.05,20)) -> None:
+
+    rss_rule  = r'<title><!\[CDATA\[(.*)\]\]><\/title>[\s\S]*?<link>(.*\.php\?id=\d+)<\/link>[\s\S]*?<enclosure url="(.*)" length="(.*)" type.*[\s\S]*?<guid isPermaLink="false">(.*)<\/guid>[\s\S]*?<pubDate>(.*)<\/pubDate>'
+    free_rule = r'<font class=\'(free|twoup|twouphalfdown|twoupfree)\''
+
+    def __init__(self, cookie:str, rss_url:str, log_file:str, log_level='info', verify=True, timeout=(5.05,20), rss_rule=rss_rule, free_rule=free_rule) -> None:
         self.cookie       = cookie
         self.rss_url      = rss_url
         self.verify       = verify
@@ -41,9 +45,8 @@ class Get_Free(object):
         self.log_file     = log_file
         self.base_url     = re.match(r'http.*/', self.rss_url).group()
         self.log          = Logger(file_name=self.log_file, level=log_level, when='D', backCount=5, interval=1)
-
-        self.rss_re_rule  = r'<title><!\[CDATA\[(.*)\]\]><\/title>[\s\S]*?<link>(.*\.php\?id=\d+)<\/link>[\s\S]*?<enclosure url="(.*)" length="(.*)" type.*[\s\S]*?<guid isPermaLink="false">(.*)<\/guid>[\s\S]*?<pubDate>(.*)<\/pubDate>'
-        self.free_re_rule = r'<font class=\'(free|twoup|twouphalfdown|twoupfree)\''
+        self.rss_re_rule  = rss_rule
+        self.free_re_rule = free_rule
         self.hr_re_rule   = r'<img class="hitandrun"'
 
         self.free_dict    = {

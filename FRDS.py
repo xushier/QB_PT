@@ -5,18 +5,18 @@
 定时
 cron: 0 0/3 * * *
 任务名称
-new Env('获取 Ourbits 指定种子');
+new Env('获取 KeepFRDS 指定种子');
 
 变量
-export ourbits_cookie
-export ourbits_rssurl
-export ourbits_limit  # 格式:最小-最大-上传速度 例: 15-800-50,即过滤 15GB 到 800GB 的免费非 HR 非老种,且添加到 QB 时设置上传限速为 50 MB/S
+export keepfrds_cookie=""
+export keepfrds_rssurl=""
+export keepfrds_limit=""  # 格式:最小-最大-上传速度 例: 15-800-50,即过滤 15GB 到 800GB 的免费非 HR 非老种,且添加到 QB 时设置上传限速为 50 MB/S
 '''
 
 from __get_free import Get_Free
 import os,sys,re
 
-site_name  = 'ourbits'
+site_name  = 'keepfrds'
 
 try:
     cookie = os.environ[site_name + '_cookie']
@@ -31,5 +31,5 @@ if __name__ == '__main__':
     max_size = re.split('-', limit)[1]
     up_limit = re.split('-', limit)[2]
     get_free = Get_Free(cookie, url, site_name + '_run.log')
-    torrents = get_free.get_free_torrents(site_name + '_temp.log', min_size=min_size, max_size=max_size)
+    torrents = get_free.get_free_torrents(site_name + '_temp.log', min_size=min_size, max_size=max_size, time_format='%a, %d %b %Y %H:%M:%S +0000')
     get_free.qbittorrent.add_torrents_from_link(torrents, up_limit - 1, '/downloads/' + site_name, site_name)

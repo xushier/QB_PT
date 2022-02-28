@@ -8,9 +8,9 @@ cron: 0 0/60 * * *
 new Env('删除指定种子');
 
 变量
-export qb_url
-export username
-export password
+export qb_url=""
+export username=""
+export password=""
 '''
 
 from __qbittorrent import Client

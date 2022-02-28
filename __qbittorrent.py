@@ -1,6 +1,14 @@
 # coding=utf-8
 # Created By Xushier  QQ:1575659493
 
+'''
+变量
+export qb_url=""
+export username=""
+export password=""
+export pushplus_token=""
+'''
+
 from __logger import Logger
 from __notifier import SendNotify
 import requests,json,time,sys,os
@@ -12,9 +20,9 @@ try:
     password = os.environ['password']
 
 ###############通知参数################
-    pushplus_token = os.environ['pushplus']
+    pushplus_token = os.environ['pushplus_token']
 except KeyError:
-    print("请检查 qb_url username password 变量是否设置！")
+    print("请检查 qb_url username password pushplus_token 变量是否设置！")
     sys.exit(1)
 
 ###############其他参数################
@@ -282,7 +290,7 @@ class Client(object):
         else:
             return str(round(bytes / 1048576, 2))
 
-    def bytes_to_gbytes(self, bytes, return_type='float') -> (float | str):
+    def bytes_to_gbytes(self, bytes, return_type='float'):
         """
         Download torrent using a link.
 

@@ -35,7 +35,7 @@ try:
     cookie  = os.environ['ob_cookie']
     rss_url = os.environ['ob_rssurl']
 except KeyError:
-    print("未设置变量！")
+    print("请检查 qb_url username password ob_cookie ob_rssurl 变量是否设置！")
     sys.exit(1)
 # Rss 间隔检测时间
 rss_time  = 3

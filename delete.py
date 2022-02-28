@@ -22,7 +22,7 @@ try:
     username = os.environ['username']
     password = os.environ['password']
 except KeyError:
-    print("未设置变量！")
+    print("请检查 qb_url username password 变量是否设置！")
     sys.exit(1)
 
 if __name__ == '__main__':

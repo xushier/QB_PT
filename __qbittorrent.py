@@ -14,7 +14,7 @@ try:
 ###############通知参数################
     pushplus_token = os.environ['pushplus']
 except KeyError:
-    print("未设置变量！")
+    print("请检查 qb_url username password 变量是否设置！")
     sys.exit(1)
 
 ###############其他参数################

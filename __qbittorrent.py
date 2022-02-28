@@ -424,12 +424,12 @@ class Client(object):
         if len(final_hashes):
             for t in list(final_hashes):
                 h           = self.get_torrent_info(t)
-                t_uploaded, t_ratio = h['total_uploaded'], h['share_ratio']
+                t_uploaded, t_ratio = self.bytes_to_gbytes(h['total_uploaded']), round(h['share_ratio'], 2)
                 t_size      = self.bytes_to_gbytes(h['total_size'])
-                t_seedtime  = h['seeding_time'] / 3600
+                t_seedtime  = round(h['seeding_time'] / 3600, 2)
                 t_addon     = self.timestamp_to_date(h['addition_date'])
                 t_compon    = self.timestamp_to_date(h['completion_date'])
-                notify_data = notify_data + "删除 - 添加于：{} - 大小：{} GB - 已上传：{} GB - 分享率：{} - 完成于：{} - 做种时间：{}小时\n".format(t_addon,t_size,t_uploaded,t_ratio,t_compon,t_seedtime)
+                notify_data = notify_data + "删除 - 添加于：{} - 大小：{} GB - 已上传：{} GB - 分享率：{} - 完成于：{} - 做种时间：{}小时\n\n".format(t_addon,t_size,t_uploaded,t_ratio,t_compon,t_seedtime)
                 time.sleep(delay)
             self.send_notify.pushplus("删种结果", notify_data)
             self.log.info(final_hashes)

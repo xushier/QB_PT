@@ -3,43 +3,48 @@
 
 '''
 变量
-export qb_url=""
-export username=""
-export password=""
-export pushplus_token=""
+export QB_URL=""
+export USERNAME=""
+export PASSWORD=""
 '''
-
+from __shift import *
 from __logger import Logger
-from __notifier import SendNotify
+from __notifier import Send_Notify
 import requests,json,time,sys,os
 
 ############### QB参数################
-try:
-    qb_url   = os.environ['qb_url']
-    username = os.environ['username']
-    password = os.environ['password']
 
-###############通知参数################
-    pushplus_token = os.environ['pushplus_token']
-except KeyError:
-    print("请检查 qb_url username password pushplus_token 变量是否设置！")
-    sys.exit(1)
+qb_config = {
+    'QB_URL': '',
+    'USERNAME': '',
+    'PASSWORD': '',
+    'FILTER_FILTER': 'all',
+    'FILTER_SORT': 'added_on',
+    'FILTER_LIMIT': 5,
+    'FILTER_REVERSE': 'False',
+    'FILTER_TIMES': 5,
+    'DELAY': 1,
+}
+
+for n in qb_config:
+    if os.getenv(n):
+        v = os.getenv(n)
+        qb_config[n] = v
 
 ###############其他参数################
-filter_filter  = 'all'
-filter_limit   = 5
-filter_sort    = 'added_on'
-filter_reverse = 'False'
-delay          = 1
-req_times      = 5
 
-class LoginRequired(Exception):
-    def __str__(self):
-        return 'Please login first.'
+filter_filter  = qb_config['FILTER_FILTER']
+filter_limit   = qb_config['FILTER_LIMIT']
+filter_sort    = qb_config['FILTER_SORT']
+filter_reverse = qb_config['FILTER_REVERSE']
+filter_times   = qb_config['FILTER_TIMES']
+delay          = qb_config['DELAY']
+
+#######################################
 
 class Client(object):
     """class to interact with qBittorrent WEB API"""
-    def __init__(self, url=qb_url, username=username, password=password, log_file_name='run.log', verify=False, timeout=(3.05,20)):
+    def __init__(self, log_file_name='qb_run.log', verify=False, timeout=(3.05,20)):
         """
         Initialize the client
 
@@ -51,26 +56,51 @@ class Client(object):
                         `(connect timeout, read timeout)` tuple.
                        Defaults to None.
         """
+
+        self.send_notify = Send_Notify()
+        self.log         = Logger(file_name=log_file_name, level='info', when='D', backCount=5, interval=1)
+
+        if not qb_config.get("QB_URL"):
+            self.log.warning("qbittorrent 地址未设置!!\n取消操作")
+            sys.exit(1)
+        if not qb_config.get("USERNAME"):
+            self.log.warning("qbittorrent 用户名未设置!!\n取消操作")
+            sys.exit(1)
+        if not qb_config.get("PASSWORD"):
+            self.log.warning("qbittorrent 密码未设置!!\n取消操作")
+            sys.exit(1)
+
+        url = qb_config.get("QB_URL")
         if not url.endswith('/'):
             url += '/'
         self.url      = url + 'api/v2/'
         self.verify   = verify
         self.timeout  = timeout
-        self.username = username
-        self.password = password
-        self.send_notify = SendNotify(pushplus_token)
-        self.log = Logger(file_name=log_file_name, level='info', when='D', backCount=5, interval=1)
+        self.username = qb_config.get("USERNAME")
+        self.password = qb_config.get("PASSWORD")
 
-        session = requests.session()
-        login = session.post(self.url + 'auth/login',
-                                  data={'username': self.username,
-                                        'password': self.password},
-                                  verify=self.verify, timeout=self.timeout)
-        if login.text == 'Ok.':
-            self._is_authenticated = True
-            self.session           = session
-        else:
-            self._is_authenticated = False
+        try:
+            self.log.info("连接 qbittorrent······")
+            session = requests.session()
+            login = session.post(self.url + 'auth/login',
+                                    data={'username': self.username,
+                                            'password': self.password},
+                                    verify=self.verify, timeout=self.timeout)
+            if login.text == 'Ok.':
+                self.log.info("连接成功")
+                self.session = session
+            if login.text == 'Fails.':
+                self.log.warning("QB 用户名或密码错误!")
+                self.send_notify("QB","用户名或密码错误!")
+                sys.exit(1)
+            if login.status_code == 403:
+                self.log.error("登录认证失败次数过多，IP 已被封禁！请更换 IP 或重启 QB!")
+                self.send_notify("QB 登录失败!","登录认证失败次数过多，IP 已被封禁！请更换 IP 或重启 QB!")
+                sys.exit(1)
+        except Exception:
+            self.log.error("QB 连接超时！")
+            self.send_notify("QB","连接超时！")
+            sys.exit(1)
 
     def _get(self, endpoint, **kwargs):
         """
@@ -108,9 +138,6 @@ class Client(object):
         """
         final_url = self.url + endpoint
 
-        if not self._is_authenticated:
-            raise LoginRequired
-
         kwargs['verify']  = self.verify
         kwargs['timeout'] = self.timeout
         if method == 'get':
@@ -130,14 +157,6 @@ class Client(object):
                 data = request.text
 
         return data
-
-    def logout(self):
-        """
-        Logout the current session.
-        """
-        response = self._get('auth/logout')
-        self._is_authenticated = False
-        return response
 
     def get_torrent_info(self, infohash):
         """
@@ -210,10 +229,13 @@ class Client(object):
         :return: Empty JSON data.
         """
         if isinstance(link, list): 
-            hashes = {"urls": '\n'.join(link), "upLimit": self.mbytes_to_bytes(uplimit, return_type='str'), "dlLimit": self.mbytes_to_bytes(dllimit, return_type='str'), "savepath": savepath, "category": category, "paused": paused}
+            hashes = {"urls": '\n'.join(link), "upLimit": mbytes_to_bytes(uplimit, return_type='str'), "dlLimit": mbytes_to_bytes(dllimit, return_type='str'), "savepath": savepath, "category": category, "paused": paused}
         else:
-            hashes = {"urls": link, "upLimit": self.mbytes_to_bytes(uplimit, return_type='str'), "dlLimit": self.mbytes_to_bytes(dllimit, return_type='str'), "savepath": savepath, "category": category, "paused": paused}
-        return self._post('torrents/add', data=hashes)
+            hashes = {"urls": link, "upLimit": mbytes_to_bytes(uplimit, return_type='str'), "dlLimit": mbytes_to_bytes(dllimit, return_type='str'), "savepath": savepath, "category": category, "paused": paused}
+        add_torrents = self.session.post(self.url + 'torrents/add', data=hashes)
+        if add_torrents.status_code == 200:
+            self.log.info("种子添加成功！")
+            return add_torrents.text
 
     def reannounce(self, infohash_list):
         """
@@ -221,9 +243,11 @@ class Client(object):
 
         :param infohash_list: Single or list() of infohashes; pass 'all' for all torrents.
         """
-
         data = self._process_infohash_list(infohash_list)
-        return self._post('torrents/reannounce', data=data)
+        reannounce_torrents = self.session.post(self.url + 'torrents/reannounce', data=data)
+        if reannounce_torrents.status_code == 200:
+            self.log.info("种子重新汇报成功！")
+            return reannounce_torrents.text
 
     def delete(self, infohash_list, delete_files=True):
         """
@@ -234,127 +258,10 @@ class Client(object):
         """
         data = self._process_infohash_list(infohash_list)
         data['deleteFiles'] = json.dumps(delete_files)
-        return self._post('torrents/delete', data=data)
-
-    def mbytes_to_bytes(self, mbytes, return_type='int'):
-        """
-        Download torrent using a link.
-
-        :param link: URL Link or list of.
-        :param savepath: Path to download the torrent.
-        :param category: Label or Category of the torrent(s).
-
-        :return: Empty JSON data.
-        """
-        if isinstance(mbytes, (str,int)):
-            mbytes = float(mbytes)
-
-        if return_type == 'int':
-            return int(mbytes*1048576)
-        else:
-            return str(int(mbytes*1048576))
-    
-    def gbytes_to_bytes(self, gbytes, return_type='int'):
-        """
-        Download torrent using a link.
-
-        :param link: URL Link or list of.
-        :param savepath: Path to download the torrent.
-        :param category: Label or Category of the torrent(s).
-
-        :return: Empty JSON data.
-        """
-        if isinstance(gbytes, (str,int)):
-            gbytes = float(gbytes)
-
-        if return_type == 'int':
-            return int(gbytes*1073741824)
-        else:
-            return str(int(gbytes*1073741824))
-    
-    def bytes_to_mbytes(self, bytes, return_type='float'):
-        """
-        Download torrent using a link.
-
-        :param link: URL Link or list of.
-        :param savepath: Path to download the torrent.
-        :param category: Label or Category of the torrent(s).
-
-        :return: Empty JSON data.
-        """
-        if isinstance(bytes, str):
-            bytes = int(bytes)
-        
-        if return_type == 'float':
-            return round(bytes / 1048576, 2)
-        else:
-            return str(round(bytes / 1048576, 2))
-
-    def bytes_to_gbytes(self, bytes, return_type='float'):
-        """
-        Download torrent using a link.
-
-        :param link: URL Link or list of.
-        :param savepath: Path to download the torrent.
-        :param category: Label or Category of the torrent(s).
-
-        :return: Empty JSON data.
-        """
-        if isinstance(bytes, str):
-            bytes = int(bytes)
-        
-        if return_type == 'float':
-            return round(bytes / 1073741824, 2)
-        else:
-            return str(round(bytes / 1073741824, 2))
-
-    def timestamp_to_date(self, timestamp, return_format='%Y-%m-%d %H:%M:%S') -> str:
-        """
-        Download torrent using a link.
-
-        :param link: URL Link or list of.
-        :param savepath: Path to download the torrent.
-        :param category: Label or Category of the torrent(s).
-
-        :return: Empty JSON data.
-        """
-        if isinstance(timestamp, str) or isinstance(timestamp, float):
-            timestamp = int(timestamp)
-
-        return time.strftime(return_format, time.localtime(timestamp))
-
-    def date_to_timestamp(self, date:str, input_format='%Y-%m-%d %H:%M:%S', return_type='int'):
-        """
-        Download torrent using a link.
-
-        :param link: URL Link or list of.
-        :param savepath: Path to download the torrent.
-        :param category: Label or Category of the torrent(s).
-
-        :return: Empty JSON data.
-        """
-        struct_time = time.strptime(date, input_format)
-
-        if return_type == 'str':
-            return str(int(time.mktime(struct_time)))
-        else:
-            return int(time.mktime(struct_time))
-
-    def olddate_to_newdate(self, date:str, input_format='%Y-%m-%d %H:%M:%S', return_format='%Y-%m-%d %H:%M:%S') -> str:
-        """
-        Download torrent using a link.
-
-        :param link: URL Link or list of.
-        :param savepath: Path to download the torrent.
-        :param category: Label or Category of the torrent(s).
-
-        :return: Empty JSON data.
-        """
-        if input_format == return_format:
-            return date
-        else:
-            struct_time = time.strptime(date, input_format)
-            return time.strftime(return_format, struct_time)
+        delete_torrents = self.session.post(self.url + 'torrents/delete', data=data)
+        if delete_torrents.status_code == 200:
+            self.log.info("种子删除成功！")
+            return delete_torrents.text
     
     @property
     def global_transfer_info(self):
@@ -367,13 +274,13 @@ class Client(object):
     def get_torrents_amount(self):
         return len(self.filter_torrents(filter='downloading')),len(self.filter_torrents(filter='all'))
 
-    def get_satisfied_torrents(self,limit=filter_limit,filter=filter_filter,sort=filter_sort,reverse=filter_reverse,delay=delay,req_times=req_times) -> list:
+    def get_satisfied_torrents(self,limit=filter_limit,filter=filter_filter,sort=filter_sort,reverse=filter_reverse,delay=delay,filter_times=filter_times) -> list:
         dl_account    = self.get_torrents_amount()[0]
         all_account   = self.get_torrents_amount()[1]
-        free_space    = self.bytes_to_gbytes(self.sync_main_data()['server_state']['free_space_on_disk'])
+        free_space    = bytes_to_gbytes(self.sync_main_data()['server_state']['free_space_on_disk'])
         transfer_info = self.global_transfer_info
-        dl_gb_data    = self.bytes_to_gbytes(transfer_info['dl_info_data'])
-        up_gb_data    = self.bytes_to_gbytes(transfer_info['up_info_data'])
+        dl_gb_data    = bytes_to_gbytes(transfer_info['dl_info_data'])
+        up_gb_data    = bytes_to_gbytes(transfer_info['up_info_data'])
         dl_gb_speed   = transfer_info['dl_info_speed']
         up_gb_speed   = transfer_info['up_info_speed']
         speed_ratio   = round(dl_gb_speed/up_gb_speed,2)
@@ -394,42 +301,42 @@ class Client(object):
             notify_data = notify_data + "可用空间：{} GB\n速度比率：{}\n种子数量：{}\n下载数量：{}\n满足删种条件，可以删种\n\n".format(free_space,speed_ratio,all_account,dl_account)
 
         names = locals()
-        for i in range(1, req_times+1):
+        for i in range(1, filter_times+1):
             names['hashes' + str(i)] = set()
 
             torinfo = self.filter_torrents(filter=filter, limit=limit, sort=sort, reverse=reverse)
 
             for tr in torinfo:
-                added_on, completion_on    = self.timestamp_to_date(tr['added_on']), self.timestamp_to_date(tr['completion_on'])
+                added_on, completion_on    = timestamp_to_date(tr['added_on']), timestamp_to_date(tr['completion_on'])
                 name, hashcode, category   = tr['name'], tr['hash'], tr['category']
-                ratio, size, state         = round(tr['ratio'],2), self.bytes_to_gbytes(tr['size']), tr['state']
+                ratio, size, state         = round(tr['ratio'],2), bytes_to_gbytes(tr['size']), tr['state']
                 progress, seed_time        = int(tr['progress']*100), tr['seeding_time'] / 3600
                 num_leechs, num_seeds      = tr['num_leechs'], tr['num_seeds']
-                dlspeed, upspeed, uploaded = tr['dlspeed'], tr['upspeed'], self.bytes_to_gbytes(tr['uploaded'])
+                dlspeed, upspeed, uploaded = tr['dlspeed'], tr['upspeed'], bytes_to_gbytes(tr['uploaded'])
 
                 if state == 'stalledUP' and ( ratio >= 1 or seed_time > 24 ) and num_leechs < 5:
-                    self.log.info("删除确认第{}次 - 空闲中 - {} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,uploaded,ratio,completion_on,name))
+                    self.log.info("删除确认第{}次 - 空闲中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
                     names['hashes' + str(i)].add(hashcode)
                 if state == 'uploading' and ( ratio >= 1 or seed_time > 24 ) and upspeed < 600*1024 and num_leechs < 5:
-                    self.log.info("删除确认第{}次 - 上传中 - {} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,uploaded,ratio,completion_on,name))
+                    self.log.info("删除确认第{}次 - 上传中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
                     names['hashes' + str(i)].add(hashcode)
                 if state == 'downloading' and dlspeed > 20*1048576 and dlspeed / upspeed >= 3 and progress > 15:
-                    self.log.info("删除确认第{}次 - 下载中 - {} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,uploaded,ratio,completion_on,name))
+                    self.log.info("删除确认第{}次 - 下载中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
                     names['hashes' + str(i)].add(hashcode)
                 time.sleep(delay)
 
         final_hashes = names['hashes' + str(1)]
-        for n in range(2, req_times+1):
+        for n in range(2, filter_times+1):
             final_hashes = final_hashes & names['hashes' + str(n)]
         if len(final_hashes):
             for t in list(final_hashes):
                 h           = self.get_torrent_info(t)
-                t_uploaded, t_ratio = self.bytes_to_gbytes(h['total_uploaded']), round(h['share_ratio'], 2)
-                t_size      = self.bytes_to_gbytes(h['total_size'])
+                t_uploaded, t_ratio = bytes_to_gbytes(h['total_uploaded']), round(h['share_ratio'], 2)
+                t_size      = bytes_to_gbytes(h['total_size'])
                 t_seedtime  = round(h['seeding_time'] / 3600, 2)
-                t_addon     = self.timestamp_to_date(h['addition_date'])
-                t_compon    = self.timestamp_to_date(h['completion_date'])
-                notify_data = notify_data + "删除 - 添加于：{} - 大小：{} GB - 已上传：{} GB - 分享率：{} - 做种时间：{}小时 - 完成于：{}\n\n".format(t_addon,t_size,t_uploaded,t_ratio,t_seedtime,t_compon)
+                t_addon     = timestamp_to_date(h['addition_date'])
+                t_compon    = timestamp_to_date(h['completion_date'])
+                notify_data = notify_data + "删除 - 添加于：{}\n大小：{} GB - 已上传：{} GB - 分享率：{}\n做种时间：{}小时 - 完成于：{}\n\n".format(t_addon,t_size,t_uploaded,t_ratio,t_seedtime,t_compon)
                 time.sleep(delay)
             self.send_notify.pushplus("删种结果", notify_data)
             self.log.info(final_hashes)

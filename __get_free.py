@@ -1,53 +1,31 @@
 # coding=utf-8
 # Created By Xushier  QQ:1575659493
 
-'''
-变量
-export qb_url=""
-export username=""
-export password=""
-export pushplus_token=""
-'''
-
 import re,requests,time,os,sys
-from __notifier import SendNotify
+from __notifier import Send_Notify
 from __logger import Logger
-from __qbittorrent import Client
-
-######################################
-###############全局变量################
+from __shift import *
 
 ###############  参数  ################
-try:
-    qb_url         = os.environ['qb_url']
-    username       = os.environ['username']
-    password       = os.environ['password']
-    pushplus_token = os.environ['pushplus_token']
-except KeyError:
-    print("请检查 qb_url username password pushplus 变量是否设置！")
-    sys.exit(1)
+
+rss_re_rule  = r'<title><!\[CDATA\[(.*)\]\]><\/title>[\s\S]*?<link>(.*\.php\?id=\d+)<\/link>[\s\S]*?<enclosure url="(.*)" length="(.*)" type.*[\s\S]*?<guid isPermaLink="false">(.*)<\/guid>[\s\S]*?<pubDate>(.*)<\/pubDate>'
+free_re_rule = r'<font class=\'(free|twoup|twouphalfdown|twoupfree)\''
 
 #######################################
-###############全局变量################
-
 
 
 class Get_Free(object):
-
-    rss_rule  = r'<title><!\[CDATA\[(.*)\]\]><\/title>[\s\S]*?<link>(.*\.php\?id=\d+)<\/link>[\s\S]*?<enclosure url="(.*)" length="(.*)" type.*[\s\S]*?<guid isPermaLink="false">(.*)<\/guid>[\s\S]*?<pubDate>(.*)<\/pubDate>'
-    free_rule = r'<font class=\'(free|twoup|twouphalfdown|twoupfree)\''
-
-    def __init__(self, cookie:str, rss_url:str, log_file:str, log_level='info', verify=True, timeout=(5.05,20), rss_rule=rss_rule, free_rule=free_rule) -> None:
+    def __init__(self, cookie:str, rss_url:str, log_file:str) -> None:
+        self.log_file     = log_file
         self.cookie       = cookie
         self.rss_url      = rss_url
-        self.verify       = verify
-        self.timeout      = timeout
-        self.log_file     = log_file
-        self.base_url     = re.match(r'http.*/', self.rss_url).group()
-        self.log          = Logger(file_name=self.log_file, level=log_level, when='D', backCount=5, interval=1)
-        self.rss_re_rule  = rss_rule
-        self.free_re_rule = free_rule
+        self.log_level    = 'info'
+        self.verify       = True
+        self.timeout      = (5.05,20)
+        self.base_url     = re.match(r'http.*/', rss_url).group()
+        self.send_notify  = Send_Notify()
         self.hr_re_rule   = r'<img class="hitandrun"'
+        self.log          = Logger(file_name=self.log_file, level=self.log_level, when='D', backCount=5, interval=1)
 
         self.free_dict    = {
             'free'            : '免费',
@@ -66,60 +44,33 @@ class Get_Free(object):
             'Referer': self.base_url,
             'Cookie': self.cookie
         }
-        
-        self.qbittorrent = Client(qb_url, username, password)
-        self.send_notify = SendNotify(pushplus_token)
 
-        session = requests.Session()
-        try:
-            login   = session.post(self.base_url, verify=self.verify, timeout=self.timeout, headers=self.host_referer)
-        except KeyError:
-            self.log.warning("环境变量未设置！")
-            sys.exit(1)
+        session_try = requests.Session()
+        login = session_try.get(self.base_url, verify=self.verify, timeout=self.timeout, headers=self.host_referer)
         if re.search('login.php', login.text):
             self.log.warning("登录已失效，请更新Cookie！")
-            self.send_notify.pushplus('OB','登录已失效，请更新Cookie！')
-            self._is_authenticated = False
+            self.send_notify.pushplus('登录失效！','登录已失效，请更新Cookie！')
             sys.exit(1)
         else:
             self.log.info('Cookie有效')
-            self._is_authenticated = True
-            self.session = session
+            self.session = session_try
 
-    def _get(self, url, **kwargs):
-        kwargs['verify']  = self.verify
-        kwargs['timeout'] = self.timeout
-
-        request = self.session.get(url, **kwargs)
-        request.raise_for_status()
-        request.encoding = 'utf_8'
-
-        if re.search('login.php', request.text):
-            self.log.warning("登录已失效，请更新Cookie！")
-            self.send_notify.pushplus('OB','登录已失效，请更新Cookie！')
-            self._is_authenticated = False
-            sys.exit(1)
-        else:
-            data = request.text
-
-        return data
-
-    def get_free_torrents(self, temp_file, time_format='%a, %d %b %Y %H:%M:%S +0800', min_size=15, max_size=800, filter_free=1, filter_hr=1, filter_old=1, delay=1, allow_time=10, rss_nums=10, rss_time=3) -> list:
+    def get_free_torrents(self, temp_file, min_size=15, max_size=800, filter_free=True, filter_hr=True, filter_old=True, delay=1, allow_time=10, rss_nums=10, rss_time=3, time_format='%a, %d %b %Y %H:%M:%S +0800', rss_re_rule=rss_re_rule, free_re_rule=free_re_rule) -> list:
         free_list   = []
-        detail_info = re.findall(self.rss_re_rule,self._get(self.rss_url))
-
+        notify_data = ""
+        detail_info = re.findall(rss_re_rule,self.session.get(self.rss_url, headers=self.host_referer).text)
         if os.path.isfile(temp_file):
             past_time = round(time.time() - os.path.getmtime(temp_file))
             self.log.info("文件存在，距上次运行已过 {} 秒".format(past_time))
-            if past_time <= (rss_time +1)*60:
+            if past_time <= rss_time*66:
                 self.log.info("使用正常模式")
-                mode = 0
+                mode = False
             else:
                 self.log.info("时间过久，使用初始运行模式")
-                mode = 1
+                mode = True
         else:
             self.log.info("文件不存在，使用初始运行模式")
-            mode = 1
+            mode = True
 
         if mode:
             url_dl_list = []
@@ -140,24 +91,24 @@ class Get_Free(object):
             detail_url    = info[1]
             hash_code     = info[4]
             download_url  = info[2].replace("amp;", "")
-            gbyte         = self.qbittorrent.bytes_to_gbytes(info[3])
-            pub_date      = self.qbittorrent.olddate_to_newdate(info[5], time_format)
-            pub_seconds   = self.qbittorrent.date_to_timestamp(info[5], time_format)
+            gbytes        = bytes_to_gbytes(info[3])
+            pub_date      = olddate_to_newdate(info[5], time_format)
+            pub_seconds   = date_to_timestamp(info[5], time_format)
 
-            if download_url + '\n' in dl_url_history:
-                self.log.info("跳过：{} - 原因：已添加 - 链接：{}".format(name,detail_url))
-                continue
+            # if download_url + '\n' in dl_url_history:
+            #     log.info("跳过：{} - 原因：已添加 - 链接：{}".format(name,detail_url))
+            #     continue
 
-            dl_url_history.append(download_url + '\n')
+            # dl_url_history.append(download_url + '\n')
 
-            if filter_old:
-                past_seconds = int(time.time()) - pub_seconds
-                if pub_seconds >= allow_time*60:
-                    self.log.info("跳过：{} - 原因：发布于 {}，{} 秒前，时间过久 - 链接：{}".format(name,pub_date,past_seconds,detail_url))
-                    continue
-                self.log.info("时间符合要求：{} - 发布于 {} - {} 秒前 - 链接：{}".format(name,pub_date,past_seconds,detail_url))
+            # if filter_old:
+            #     past_seconds = int(time.time()) - pub_seconds
+            #     if pub_seconds >= allow_time*60:
+            #         log.info("跳过：{} - 原因：发布于 {}，{} 秒前，时间过久 - 链接：{}".format(name,pub_date,past_seconds,detail_url))
+            #         continue
+            #     log.info("时间符合要求：{} - 发布于 {} - {} 秒前 - 链接：{}".format(name,pub_date,past_seconds,detail_url))
 
-            req_detail_url  = self._get(detail_url)
+            req_detail_url  = self.session.get(detail_url, headers=self.host_referer)
             if re.search('未登录!', req_detail_url.text):
                 self.log.warning("登录已失效，请更新Cookie！")
                 self.send_notify.pushplus('站点登录失效！','登录已失效，请更新Cookie！')
@@ -165,7 +116,7 @@ class Get_Free(object):
 
             # 获取种子的促销指定状态，若非指定状态则退出本次循环
             if filter_free:
-                free_info = re.search(self.free_re_rule, req_detail_url.text)
+                free_info = re.search(free_re_rule, req_detail_url.text)
                 if free_info == None:
                     self.log.info("跳过：{} - 原因：黑种或 %50 下载 - 链接：{}".format(name,detail_url))
                     continue
@@ -180,11 +131,11 @@ class Get_Free(object):
                 self.log.info("HR 符合要求：{} - 非 HR - 链接：{}".format(name,detail_url))
 
             # 判断种子大小是否满足筛选条件，若不满足则退出本次循环
-            if max_size <= gbyte or gbyte <= min_size:
-                self.log.info("跳过：{} - 原因：过大或过小({} GB) - 链接：{}".format(name,gbyte,detail_url))
+            if max_size <= gbytes or gbytes <= min_size:
+                self.log.info("跳过：{} - 原因：过大或过小({} GB) - 链接：{}".format(name,gbytes,detail_url))
                 continue
-            self.log.info("大小符合要求：{} - 大小：{} - 链接：{}".format(name,gbyte,detail_url))
-            self.send_notify.pushplus("添加种子","名称：{}\n大小：{} GB\n详情页:{}\n".format(name,gbyte,detail_url))
+            self.log.info("大小符合要求：{} - 大小：{} - 链接：{}".format(name,gbytes,detail_url))
+            notify_data = notify_data + "名称：{}\n大小：{} GB\n详情页:{}\n".format(name,gbytes,detail_url)
 
             # 将符合条件的种子下载链接存入列表
             free_list.append(download_url)
@@ -197,14 +148,15 @@ class Get_Free(object):
 
         if len(dl_url_history) > rss_nums:
             del_counts = len(dl_url_history) - rss_nums
-            del dl_url_history[:del_counts]
             self.log.info("指定 {} 个记录，共有 {} 个，删除 {} 个".format(rss_nums,len(dl_url_history),del_counts))
+            del dl_url_history[:del_counts]
 
         with open(temp_file, "w+") as f:
             f.writelines(dl_url_history)
 
         if len(free_list):
             self.log.info("本次运行满足条件的种子有 {} 个，下载链接：{}".format(len(free_list),free_list))
+            self.send_notify.pushplus("添加种子", notify_data)
             return(free_list)
         else:
             self.log.info("没有符合条件的种子")

@@ -3,33 +3,54 @@
 
 '''
 定时
-cron: 0 0/3 * * * *
+cron: 30 0/3 * * * *
 任务名称
 new Env('HDHome 刷流');
 
 变量
-export hdhome_cookie=""
-export hdhome_rssurl=""
-export hdhome_limit=""  # 格式:最小-最大-上传速度 例: 15-800-50,即过滤 15GB 到 800GB 的免费非 HR 非老种,且添加到 QB 时设置上传限速为 50 MB/S
+export HDHOME_COOKIE=""
+export HDHOME_USERNAME=""
+export HDHOME_PASSWORD=""
 '''
-
+import sys,re,os
+from __qbittorrent import Client
 from __get_free import Get_Free
-import os,sys,re
 
-site_name  = 'hdhome'
+site = 'HDHOME'
+site_lowwer = site.lower()
 
-try:
-    cookie = os.environ[site_name + '_cookie']
-    url    = os.environ[site_name + '_rssurl']
-    limit  = os.environ[site_name + '_limit']
-except KeyError:
-    print("请检查 {}_cookie {}_rssurl {}_limit 变量是否设置！".format(site_name,site_name,site_name))
+config = {
+    site + '_COOKIE': '',
+    site + '_RSS_URL': '',
+    site + '_CONFIG': '15-300-15',
+
+    site + '_SAVE_PATH': '/downloads/' + site_lowwer,
+    site + '_RUN_LOG': site_lowwer + '_run.log',
+    site + '_TEMP_LOG': site_lowwer + '_temp.log',
+}
+
+for n in config:
+    if os.getenv(n):
+        v = os.getenv(n)
+        config[n] = v
+
+if not ( config[site + '_COOKIE'] or config[site + '_RSS_URL'] or config[site + '_CONFIG'] ):
+    print("请检查 HDHOME_COOKIE HDHOME_RSS_URL HDHOME_CONFIG 变量是否设置！")
     sys.exit(1)
 
-if __name__ == '__main__':
-    min_size = re.split('-', limit)[0]
-    max_size = re.split('-', limit)[1]
-    up_limit = re.split('-', limit)[2]
-    get_free = Get_Free(cookie, url, site_name + '_run.log')
-    torrents = get_free.get_free_torrents(site_name + '_temp.log', min_size=min_size, max_size=max_size)
-    get_free.qbittorrent.add_torrents_from_link(torrents, up_limit - 1, '/downloads/' + site_name, site_name)
+site_config = re.split('-', config[site + '_CONFIG'])
+
+category  = site.lower()
+min_size  = int(site_config[0])
+max_size  = int(site_config[1])
+up_limit  = int(site_config[2])
+save_path = config[site + '_SAVE_PATH']
+run_log   = config[site + '_RUN_LOG']
+temp_log  = config[site + '_TEMP_LOG']
+cookie    = config[site + '_COOKIE']
+rss_url   = config[site + '_RSS_URL']
+
+
+h = Get_Free(cookie, rss_url, run_log).get_free_torrents(temp_log, min_size=min_size, max_size=max_size)
+s = Client()
+s.add_torrents_from_link(h, up_limit, save_path, category)

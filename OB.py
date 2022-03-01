@@ -9,8 +9,8 @@ new Env('Ourbits 刷流');
 
 变量
 export OURBITS_COOKIE=""
-export OURBITS_USERNAME=""
-export OURBITS_PASSWORD=""
+export OURBITS_RSS_URL=""
+export OURBITS_CONFIG=""
 '''
 import sys,re,os
 from __qbittorrent import Client

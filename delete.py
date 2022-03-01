@@ -10,7 +10,6 @@ new Env('删种');
 
 from __qbittorrent import Client
 
-if __name__ == '__main__':
-    qb = Client()
-    torrents = qb.get_satisfied_torrents()
-    qb.delete(torrents)
+qb = Client()
+torrents = qb.get_satisfied_torrents()
+qb.delete(torrents)

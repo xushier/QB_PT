@@ -323,7 +323,7 @@ class Client(object):
                 if state == 'downloading' and dlspeed > 20*1048576 and dlspeed / upspeed >= 3 and progress > 15:
                     self.log.info("删除确认第{}次 - 下载中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
                     names['hashes' + str(i)].add(hashcode)
-                time.sleep(delay)
+            time.sleep(delay)
 
         final_hashes = names['hashes' + str(1)]
         for n in range(2, filter_times+1):

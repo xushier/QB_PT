@@ -16,47 +16,45 @@ import sys,re,os
 from __qbittorrent import Client
 from __get_free import Get_Free
 
-if __name__ == '__main__':
+site = 'HDHOME'
+site_lowwer = site.lower()
 
-    site = 'HDHOME'
-    site_lowwer = site.lower()
+config = {
+    site + '_COOKIE': '',
+    site + '_RSS_URL': '',
+    site + '_CONFIG': '',
 
-    config = {
-        site + '_COOKIE': '',
-        site + '_RSS_URL': '',
-        site + '_CONFIG': '',
+    site + '_SAVE_PATH': '/downloads/' + site_lowwer,
+    site + '_RUN_LOG': site_lowwer + '_run.log',
+    site + '_TEMP_LOG': site_lowwer + '_temp.log',
+}
 
-        site + '_SAVE_PATH': '/downloads/' + site_lowwer,
-        site + '_RUN_LOG': site_lowwer + '_run.log',
-        site + '_TEMP_LOG': site_lowwer + '_temp.log',
-    }
+for n in config:
+    if os.getenv(n):
+        v = os.getenv(n)
+        config[n] = v
 
-    for n in config:
-        if os.getenv(n):
-            v = os.getenv(n)
-            config[n] = v
+if not config[site + '_COOKIE']:
+    print("请检查 HDHOME_COOKIE 变量是否设置！")
+    sys.exit(1)
+if not config[site + '_RSS_URL']:
+    print("请检查 HDHOME_RSS_URL 变量是否设置！")
+    sys.exit(1)
+if not config[site + '_COOKIE']:
+    print("请检查 HDHOME_CONFIG 变量是否设置！")
+    sys.exit(1)
 
-    if not config[site + '_COOKIE']:
-        print("请检查 HDHOME_COOKIE 变量是否设置！")
-        sys.exit(1)
-    if not config[site + '_RSS_URL']:
-        print("请检查 HDHOME_RSS_URL 变量是否设置！")
-        sys.exit(1)
-    if not config[site + '_COOKIE']:
-        print("请检查 HDHOME_CONFIG 变量是否设置！")
-        sys.exit(1)
+site_config = re.split('-', config[site + '_CONFIG'])
+category    = site.lower()
+min_size    = int(site_config[0])
+max_size    = int(site_config[1])
+up_limit    = int(site_config[2])
+save_path   = config[site + '_SAVE_PATH']
+run_log     = config[site + '_RUN_LOG']
+temp_log    = config[site + '_TEMP_LOG']
+cookie      = config[site + '_COOKIE']
+rss_url     = config[site + '_RSS_URL']
 
-    site_config = re.split('-', config[site + '_CONFIG'])
-    category    = site.lower()
-    min_size    = int(site_config[0])
-    max_size    = int(site_config[1])
-    up_limit    = int(site_config[2])
-    save_path   = config[site + '_SAVE_PATH']
-    run_log     = config[site + '_RUN_LOG']
-    temp_log    = config[site + '_TEMP_LOG']
-    cookie      = config[site + '_COOKIE']
-    rss_url     = config[site + '_RSS_URL']
-
-    free_torrents = Get_Free(cookie, rss_url, run_log).get_free_torrents(temp_log, min_size=min_size, max_size=max_size)
-    qb = Client()
-    qb.add_torrents_from_link(free_torrents, up_limit, save_path, category)
+free_torrents = Get_Free(cookie, rss_url, run_log).get_free_torrents(temp_log, min_size=min_size, max_size=max_size)
+qb = Client()
+qb.add_torrents_from_link(free_torrents, up_limit, save_path, category)

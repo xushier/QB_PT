@@ -120,7 +120,8 @@ class Get_Free(object):
                 if free_info == None:
                     self.log.info("跳过：{} - 原因：黑种或 %50 下载 - 链接：{}".format(name,detail_url))
                     continue
-                self.log.info("促销符合要求：{} - 促销状态：{} - 链接：{}".format(name,self.free_dict[free_info.group(1)],detail_url))
+                free_status = self.free_dict[free_info.group(1)]
+                self.log.info("促销符合要求：{} - 促销状态：{} - 链接：{}".format(name,free_status,detail_url))
 
             # 获取种子的 HR 状态，若为 HR 状态则退出本次循环
             if filter_hr:
@@ -135,7 +136,7 @@ class Get_Free(object):
                 self.log.info("跳过：{} - 原因：过大或过小({} GB) - 链接：{}".format(name,gbytes,detail_url))
                 continue
             self.log.info("大小符合要求：{} - 大小：{} - 链接：{}".format(name,gbytes,detail_url))
-            notify_data = notify_data + "名称：{}\n大小：{} GB\n详情页:{}\n".format(name,gbytes,detail_url)
+            notify_data = notify_data + "名称：{}\n大小：{} GB\n状态：{}\n发布：{}\n链接：{}\n".format(name,gbytes,free_status,pub_date,detail_url)
 
             # 将符合条件的种子下载链接存入列表
             free_list.append(download_url)

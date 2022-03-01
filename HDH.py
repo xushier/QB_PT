@@ -17,16 +17,16 @@ from __qbittorrent import Client
 from __get_free import Get_Free
 
 site = 'HDHOME'
-site_lowwer = site.lower()
+site_lower = site.lower()
 
 config = {
     site + '_COOKIE': '',
     site + '_RSS_URL': '',
     site + '_CONFIG': '',
 
-    site + '_SAVE_PATH': '/downloads/' + site_lowwer,
-    site + '_RUN_LOG': site_lowwer + '_run.log',
-    site + '_TEMP_LOG': site_lowwer + '_temp.log',
+    site + '_SAVE_PATH': '/downloads/' + site_lower,
+    site + '_RUN_LOG': site_lower + '_run.log',
+    site + '_TEMP_LOG': site_lower + '_temp.log',
 }
 
 for n in config:
@@ -45,7 +45,7 @@ if not config[site + '_COOKIE']:
     sys.exit(1)
 
 site_config = re.split('-', config[site + '_CONFIG'])
-category    = site.lower()
+category    = site_lower
 min_size    = int(site_config[0])
 max_size    = int(site_config[1])
 up_limit    = int(site_config[2])

@@ -22,7 +22,7 @@ site_lowwer = site.lower()
 config = {
     site + '_COOKIE': '',
     site + '_RSS_URL': '',
-    site + '_CONFIG': '15-300-15',
+    site + '_CONFIG': '',
 
     site + '_SAVE_PATH': '/downloads/' + site_lowwer,
     site + '_RUN_LOG': site_lowwer + '_run.log',

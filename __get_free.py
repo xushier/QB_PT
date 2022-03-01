@@ -95,18 +95,18 @@ class Get_Free(object):
             pub_date      = olddate_to_newdate(info[5], time_format)
             pub_seconds   = date_to_timestamp(info[5], time_format)
 
-            # if download_url + '\n' in dl_url_history:
-            #     log.info("跳过：{} - 原因：已添加 - 链接：{}".format(name,detail_url))
-            #     continue
+            if download_url + '\n' in dl_url_history:
+                log.info("跳过：{} - 原因：已添加 - 链接：{}".format(name,detail_url))
+                continue
 
-            # dl_url_history.append(download_url + '\n')
+            dl_url_history.append(download_url + '\n')
 
-            # if filter_old:
-            #     past_seconds = int(time.time()) - pub_seconds
-            #     if pub_seconds >= allow_time*60:
-            #         log.info("跳过：{} - 原因：发布于 {}，{} 秒前，时间过久 - 链接：{}".format(name,pub_date,past_seconds,detail_url))
-            #         continue
-            #     log.info("时间符合要求：{} - 发布于 {} - {} 秒前 - 链接：{}".format(name,pub_date,past_seconds,detail_url))
+            if filter_old:
+                past_seconds = int(time.time()) - pub_seconds
+                if pub_seconds >= allow_time*60:
+                    log.info("跳过：{} - 原因：发布于 {}，{} 秒前，时间过久 - 链接：{}".format(name,pub_date,past_seconds,detail_url))
+                    continue
+                log.info("时间符合要求：{} - 发布于 {} - {} 秒前 - 链接：{}".format(name,pub_date,past_seconds,detail_url))
 
             req_detail_url  = self.session.get(detail_url, headers=self.host_referer)
             if re.search('未登录!', req_detail_url.text):

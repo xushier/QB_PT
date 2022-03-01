@@ -347,5 +347,4 @@ class Client(object):
             return list(final_hashes)
         else:
             self.log.info("没有符合条件的种子，无需删除")
-            self.send_notify.pushplus("删种结果","没有满足删种条件的种子")
             sys.exit(0)

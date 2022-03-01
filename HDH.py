@@ -9,8 +9,8 @@ new Env('HDHome 刷流');
 
 变量
 export HDHOME_COOKIE=""
-export HDHOME_USERNAME=""
-export HDHOME_PASSWORD=""
+export HDHOME_RSS_URL=""
+export HDHOME_CONFIG=""
 '''
 import sys,re,os
 from __qbittorrent import Client

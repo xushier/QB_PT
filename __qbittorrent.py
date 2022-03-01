@@ -20,7 +20,7 @@ qb_config = {
     'PASSWORD': '',
     'FILTER_FILTER': 'all',
     'FILTER_SORT': 'added_on',
-    'FILTER_LIMIT': 5,
+    'FILTER_LIMIT': 30,
     'FILTER_REVERSE': 'False',
     'FILTER_TIMES': 5,
     'DELAY': 3,
@@ -297,7 +297,7 @@ class Client(object):
             self.log.info("当前时间：{}点，无需删种".format(time_now))
             sys.exit(0)
 
-        if free_space >= 500 and speed_ratio < 3 and all_account < 30 and dl_account < 10:
+        if free_space >= 500 and speed_ratio < 3 and all_account < 25 and dl_account < 10:
             self.log.info("可用空间：{} GB，速度比：{}，种子数量：{}，下载数量：{}，无需删种".format(free_space,speed_ratio,all_account,dl_account))
             sys.exit(0)
         else:
@@ -318,10 +318,10 @@ class Client(object):
                 num_leechs, num_seeds      = tr['num_leechs'], tr['num_seeds']
                 dlspeed, upspeed, uploaded = tr['dlspeed'], tr['upspeed'], bytes_to_gbytes(tr['uploaded'])
 
-                if state == 'stalledUP' and ( ratio >= 1 or seed_time > 24 ) and num_leechs < 5:
+                if state == 'stalledUP' and ( ratio >= 2 or seed_time > 24 ) and num_leechs < 5:
                     self.log.info("删除确认第{}次 - 空闲中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
                     names['hashes' + str(i)].add(hashcode)
-                if state == 'uploading' and ( ratio >= 1 or seed_time > 24 ) and upspeed < 600*1024 and num_leechs < 5:
+                if state == 'uploading' and ( ratio >= 2 or seed_time > 24 ) and upspeed < 600*1024 and num_leechs < 5:
                     self.log.info("删除确认第{}次 - 上传中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
                     names['hashes' + str(i)].add(hashcode)
                 if state == 'downloading' and dlspeed > 20*1048576 and dlspeed / upspeed >= 3 and progress > 15:

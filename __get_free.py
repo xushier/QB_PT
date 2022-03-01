@@ -103,7 +103,7 @@ class Get_Free(object):
 
             if filter_old:
                 past_seconds = int(time.time()) - pub_seconds
-                if pub_seconds >= allow_time*60:
+                if past_seconds >= allow_time*60:
                     self.log.info("跳过：{} - 原因：发布于 {}，{} 秒前，时间过久 - 链接：{}".format(name,pub_date,past_seconds,detail_url))
                     continue
                 self.log.info("时间符合要求：{} - 发布于 {} - {} 秒前 - 链接：{}".format(name,pub_date,past_seconds,detail_url))

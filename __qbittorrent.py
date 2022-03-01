@@ -89,13 +89,17 @@ class Client(object):
             if login.text == 'Ok.':
                 self.log.info("连接成功")
                 self.session = session
-            if login.text == 'Fails.':
+            elif login.text == 'Fails.':
                 self.log.warning("QB 用户名或密码错误!")
                 self.send_notify("QB","用户名或密码错误!")
                 sys.exit(1)
-            if login.status_code == 403:
+            elif login.status_code == 403:
                 self.log.error("登录认证失败次数过多，IP 已被封禁！请更换 IP 或重启 QB!")
                 self.send_notify("QB 登录失败!","登录认证失败次数过多，IP 已被封禁！请更换 IP 或重启 QB!")
+                sys.exit(1)
+            else:
+                self.log.error("QB 未知错误！")
+                self.send_notify("QB 未知错误!","未知错误")
                 sys.exit(1)
         except Exception:
             self.log.error("QB 连接超时！")

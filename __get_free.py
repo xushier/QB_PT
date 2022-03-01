@@ -55,7 +55,7 @@ class Get_Free(object):
             self.log.info('Cookie有效')
             self.session = session_try
 
-    def get_free_torrents(self, temp_file, min_size=15, max_size=800, filter_free=True, filter_hr=True, filter_old=True, delay=1, allow_time=10, rss_nums=10, rss_time=3, time_format='%a, %d %b %Y %H:%M:%S +0800', rss_re_rule=rss_re_rule, free_re_rule=free_re_rule) -> list:
+    def get_free_torrents(self, temp_file, min_size=15, max_size=800, filter_free=True, filter_hr=True, filter_old=True, delay=1, allow_time=10, rss_nums=15, rss_time=3, time_format='%a, %d %b %Y %H:%M:%S +0800', rss_re_rule=rss_re_rule, free_re_rule=free_re_rule) -> list:
         free_list   = []
         notify_data = ""
         detail_info = re.findall(rss_re_rule,self.session.get(self.rss_url, headers=self.host_referer).text)

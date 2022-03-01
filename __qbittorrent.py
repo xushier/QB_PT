@@ -23,7 +23,7 @@ qb_config = {
     'FILTER_LIMIT': 5,
     'FILTER_REVERSE': 'False',
     'FILTER_TIMES': 5,
-    'DELAY': 1,
+    'DELAY': 0,
 }
 
 for n in qb_config:

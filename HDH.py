@@ -34,8 +34,14 @@ for n in config:
         v = os.getenv(n)
         config[n] = v
 
-if not ( config[site + '_COOKIE'] or config[site + '_RSS_URL'] or config[site + '_CONFIG'] ):
-    print("请检查 HDHOME_COOKIE HDHOME_RSS_URL HDHOME_CONFIG 变量是否设置！")
+if not config[site + '_COOKIE']:
+    print("请检查 HDHOME_COOKIE 变量是否设置！")
+    sys.exit(1)
+if not config[site + '_RSS_URL']:
+    print("请检查 HDHOME_RSS_URL 变量是否设置！")
+    sys.exit(1)
+if not config[site + '_COOKIE']:
+    print("请检查 HDHOME_CONFIG 变量是否设置！")
     sys.exit(1)
 
 site_config = re.split('-', config[site + '_CONFIG'])

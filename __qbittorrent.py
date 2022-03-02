@@ -24,6 +24,7 @@ qb_config = {
     'FILTER_REVERSE': 'False',
     'FILTER_TIMES': 3,
     'DELAY': 5,
+    'MAX_DELETE': 3,
 }
 
 for n in qb_config:
@@ -39,6 +40,7 @@ filter_sort    = qb_config['FILTER_SORT']
 filter_reverse = qb_config['FILTER_REVERSE']
 filter_times   = qb_config['FILTER_TIMES']
 delay          = qb_config['DELAY']
+max_delete     = qb_config['MAX_DELETE']
 
 #######################################
 
@@ -278,7 +280,7 @@ class Client(object):
     def get_torrents_amount(self):
         return len(self.filter_torrents(filter='downloading')),len(self.filter_torrents(filter='all'))
 
-    def get_satisfied_torrents(self,limit=filter_limit,filter=filter_filter,sort=filter_sort,reverse=filter_reverse,delay=delay,filter_times=filter_times) -> list:
+    def get_satisfied_torrents(self,limit=filter_limit,filter=filter_filter,sort=filter_sort,reverse=filter_reverse,delay=delay,filter_times=filter_times,max_delete=max_delete) -> list:
         dl_account    = self.get_torrents_amount()[0]
         all_account   = self.get_torrents_amount()[1]
         free_space    = bytes_to_gbytes(self.sync_main_data()['server_state']['free_space_on_disk'])
@@ -335,7 +337,10 @@ class Client(object):
         for n in range(2, filter_times+1):
             final_hashes = final_hashes & names['hashes' + str(n)]
         if len(final_hashes):
-            for t in list(final_hashes):
+            final_hashes = list(final_hashes)
+            if len(final_hashes) > max_delete:
+                del final_hashes[max_delete:]
+            for t in final_hashes:
                 h           = self.get_torrent_info(t)
                 t_uploaded, t_ratio = bytes_to_gbytes(h['total_uploaded']), round(h['share_ratio'], 2)
                 t_size      = bytes_to_gbytes(h['total_size'])
@@ -346,7 +351,7 @@ class Client(object):
                 time.sleep(delay)
             self.send_notify.pushplus("删种结果", notify_data)
             self.log.info(final_hashes)
-            return list(final_hashes)
+            return final_hashes
         else:
             self.log.info("没有符合条件的种子，无需删除")
             sys.exit(0)

@@ -224,7 +224,7 @@ class Client(object):
             data = {'hashes': infohash_list.lower()}
         return data
 
-    def add_torrents_from_link(self, link, uplimit:int, savepath:str, category:str, dllimit=60, paused='false'):
+    def add_torrents_from_link(self, link, uplimit:int, savepath:str, category:str, dllimit=50, paused='false'):
         """
         Download torrent using a link.
 

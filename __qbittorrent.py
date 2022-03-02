@@ -318,7 +318,7 @@ class Client(object):
                 num_leechs, num_seeds      = tr['num_leechs'], tr['num_seeds']
                 dlspeed, upspeed, uploaded = tr['dlspeed'], tr['upspeed'], bytes_to_gbytes(tr['uploaded'])
                 if state != 'downloading':
-                    seed_time = tr['seeding_time'] / 3600
+                    seed_time = round(((time.time() - tr['completion_on']) / 3600),2)
 
                 if state == 'stalledUP' and ( ratio >= 2 or seed_time > 24 ) and num_leechs < 5:
                     self.log.info("删除确认第{}次 - 空闲中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))

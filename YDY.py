@@ -41,7 +41,7 @@ if not config[site + '_RSS_URL']:
     print("请检查 HDBD_RSS_URL 变量是否设置！")
     sys.exit(1)
 if not config[site + '_COOKIE']:
-    print("请检查 HDBD_CONFIG 变量是否设置！")
+    print("请检查 HDBD_CONFIG 变量是否设置！设置举例，5-200-25，即筛选5到200G大小的种子，并且设置上传限速25M")
     sys.exit(1)
 
 site_config = re.split('-', config[site + '_CONFIG'])

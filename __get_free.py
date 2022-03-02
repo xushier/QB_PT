@@ -59,7 +59,7 @@ class Get_Free(object):
         free_list   = []
         notify_data = ""
         rss_req     = self.session.get(self.rss_url, headers=self.host_referer)
-        rss_req.encoding('utf-8')
+        rss_req.encoding = 'utf-8'
         detail_info = re.findall(rss_re_rule, rss_req.text)
         if os.path.isfile(temp_file):
             past_time = round(time.time() - os.path.getmtime(temp_file))
@@ -111,7 +111,7 @@ class Get_Free(object):
                 self.log.info("时间符合要求：{} - 发布于 {} - {} 秒前 - 链接：{}".format(name,pub_date,past_seconds,detail_url))
 
             req_detail_url  = self.session.get(detail_url, headers=self.host_referer)
-            req_detail_url.encoding('utf-8')
+            req_detail_url.encoding = 'utf-8'
             if re.search('未登录!', req_detail_url.text):
                 self.log.warning("登录已失效，请更新Cookie！")
                 self.send_notify.pushplus('站点登录失效！','登录已失效，请更新Cookie！')

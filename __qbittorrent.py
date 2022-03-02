@@ -22,8 +22,8 @@ qb_config = {
     'FILTER_SORT': 'added_on',
     'FILTER_LIMIT': 30,
     'FILTER_REVERSE': 'False',
-    'FILTER_TIMES': 5,
-    'DELAY': 3,
+    'FILTER_TIMES': 3,
+    'DELAY': 5,
 }
 
 for n in qb_config:
@@ -314,9 +314,11 @@ class Client(object):
                 added_on, completion_on    = timestamp_to_date(tr['added_on']), timestamp_to_date(tr['completion_on'])
                 name, hashcode, category   = tr['name'], tr['hash'], tr['category']
                 ratio, size, state         = round(tr['ratio'],2), bytes_to_gbytes(tr['size']), tr['state']
-                progress, seed_time        = int(tr['progress']*100), tr['seeding_time'] / 3600
+                progress                   = int(tr['progress']*100)
                 num_leechs, num_seeds      = tr['num_leechs'], tr['num_seeds']
                 dlspeed, upspeed, uploaded = tr['dlspeed'], tr['upspeed'], bytes_to_gbytes(tr['uploaded'])
+                if state != 'downloading':
+                    seed_time = tr['seeding_time'] / 3600
 
                 if state == 'stalledUP' and ( ratio >= 2 or seed_time > 24 ) and num_leechs < 5:
                     self.log.info("删除确认第{}次 - 空闲中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))

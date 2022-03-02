@@ -45,8 +45,8 @@ class Get_Free(object):
             'Cookie': self.cookie
         }
 
-        session_try = requests.Session()
-        login = session_try.get(self.base_url, verify=self.verify, timeout=self.timeout, headers=self.host_referer)
+        session_try    = requests.Session()
+        login          = session_try.get(self.base_url, verify=self.verify, timeout=self.timeout, headers=self.host_referer)
         if re.search('login.php', login.text):
             self.log.warning("登录已失效，请更新Cookie！")
             self.send_notify.pushplus('登录失效！','登录已失效，请更新Cookie！')
@@ -55,10 +55,12 @@ class Get_Free(object):
             self.log.info('Cookie有效')
             self.session = session_try
 
-    def get_free_torrents(self, temp_file, min_size=15, max_size=800, filter_free=True, filter_hr=True, filter_old=True, delay=1, allow_time=10, rss_nums=15, rss_time=3, time_format='%a, %d %b %Y %H:%M:%S +0800', rss_re_rule=rss_re_rule, free_re_rule=free_re_rule) -> list:
+    def get_free_torrents(self, temp_file, category, min_size=15, max_size=800, filter_free=True, filter_hr=True, filter_old=True, delay=1, allow_time=10, rss_nums=15, rss_time=3, time_format='%a, %d %b %Y %H:%M:%S +0800', rss_re_rule=rss_re_rule, free_re_rule=free_re_rule) -> list:
         free_list   = []
         notify_data = ""
-        detail_info = re.findall(rss_re_rule,self.session.get(self.rss_url, headers=self.host_referer).text)
+        rss_req     = self.session.get(self.rss_url, headers=self.host_referer)
+        rss_req.encoding('utf-8')
+        detail_info = re.findall(rss_re_rule, rss_req.text)
         if os.path.isfile(temp_file):
             past_time = round(time.time() - os.path.getmtime(temp_file))
             self.log.info("文件存在，距上次运行已过 {} 秒".format(past_time))
@@ -109,6 +111,7 @@ class Get_Free(object):
                 self.log.info("时间符合要求：{} - 发布于 {} - {} 秒前 - 链接：{}".format(name,pub_date,past_seconds,detail_url))
 
             req_detail_url  = self.session.get(detail_url, headers=self.host_referer)
+            req_detail_url.encoding('utf-8')
             if re.search('未登录!', req_detail_url.text):
                 self.log.warning("登录已失效，请更新Cookie！")
                 self.send_notify.pushplus('站点登录失效！','登录已失效，请更新Cookie！')
@@ -136,7 +139,7 @@ class Get_Free(object):
                 self.log.info("跳过：{} - 原因：过大或过小({} GB) - 链接：{}".format(name,gbytes,detail_url))
                 continue
             self.log.info("大小符合要求：{} - 大小：{} - 链接：{}".format(name,gbytes,detail_url))
-            notify_data = notify_data + "名称：{}\n大小：{} GB\n状态：{}\n发布：{}\n链接：{}\n".format(name,gbytes,free_status,pub_date,detail_url)
+            notify_data = notify_data + "分类：{}\n名称：{}\n大小：{} GB\n状态：{}\n发布：{}\n链接：{}\n\n".format(category,name,gbytes,free_status,pub_date,detail_url)
 
             # 将符合条件的种子下载链接存入列表
             free_list.append(download_url)
@@ -157,7 +160,7 @@ class Get_Free(object):
 
         if len(free_list):
             self.log.info("本次运行满足条件的种子有 {} 个，下载链接：{}".format(len(free_list),free_list))
-            self.send_notify.pushplus("添加种子", notify_data)
+            self.send_notify.pushplus("添加 {} 种子，共 {} 个".format(category,len(free_list)), notify_data)
             return(free_list)
         else:
             self.log.info("没有符合条件的种子")

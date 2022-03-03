@@ -238,6 +238,11 @@ class Client(object):
             hashes = {"urls": '\n'.join(link), "upLimit": mbytes_to_bytes(uplimit, return_type='str'), "dlLimit": mbytes_to_bytes(dllimit, return_type='str'), "savepath": savepath, "category": category, "paused": paused}
         else:
             hashes = {"urls": link, "upLimit": mbytes_to_bytes(uplimit, return_type='str'), "dlLimit": mbytes_to_bytes(dllimit, return_type='str'), "savepath": savepath, "category": category, "paused": paused}
+        connections = self.sync_main_data()['server_state']['total_peer_connections']
+        if connections > 1000:
+            self.log.warning("QB 总连接用户数为 {}，超过 1000，不添加种子".format(connections))
+            self.send_notify("连接数过多，不添加种子", "QB 总连接用户数为 {}".format(connections))
+            return
         add_torrents = self.session.post(self.url + 'torrents/add', data=hashes)
         if add_torrents.status_code == 200:
             self.log.info("种子添加成功！")

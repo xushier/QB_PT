@@ -2,7 +2,8 @@
 
 需搭配青龙面板使用
 
-青龙添加任务 ql repo https://ghproxy.com/https://github.com/xushier/QB_PT.git "" "__" "logger|notifier|qbittorrent|get_free|shift"
+青龙添加任务
+`ql repo https://ghproxy.com/https://github.com/xushier/QB_PT.git "" "__" "logger|notifier|qbittorrent|get_free|shift"`
 
 添加之后，在环境变量添加qb地址，qb用户名，qb密码，pushplus token，以及需要刷流的站的cookie，rss地址和配置。
 

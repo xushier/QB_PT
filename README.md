@@ -5,7 +5,16 @@
 青龙添加任务
 `ql repo https://ghproxy.com/https://github.com/xushier/QB_PT.git "" "__" "logger|notifier|qbittorrent|get_free|shift"`
 
-添加之后，在环境变量添加 QB_URL(QB地址)，QB_USERNAME(QB用户名)，QB_PASSWORD(QB密码)，PUSH_PLUS_TOKEN(PushPlusToken)，以及 XXX_COOKIE(需要刷流的站的cookie)，XXX_RSS_URL(需要刷流的站的rss地址，XXX_CONFIG(需要刷流的站的筛选和限速配置）。
+添加之后，在环境变量添加
+```
+QB_URL(QB地址)
+QB_USERNAME(QB用户名)
+QB_PASSWORD(QB密码)
+PUSH_PLUS_TOKEN(PushPlusToken)
+XXX_COOKIE(需要刷流的站的cookie)
+XXX_RSS_URL(需要刷流的站的rss地址)
+XXX_CONFIG(需要刷流的站的筛选和限速配置)
+```
 
 # 举例：
 刷 hdhome 的话，在环境变量里添加如下 7 个环境变量，或者直接在配置文件里添加如下 7 行，对应值改成你自己的。

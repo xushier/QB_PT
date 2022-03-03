@@ -17,4 +17,4 @@ export HDHOME_COOKIE="hdhome_cookie"
 export HDHOME_RSS_URL="hdhome_rss_url"
 export HDHOME_CONFIG="15-800-25"
 ```
-# 注：若不需要通知，PUSH_PLUS_TOKEN 随便填就可以，但一定要有。
+注：若不需要通知，PUSH_PLUS_TOKEN 随便填就可以，但一定要有。

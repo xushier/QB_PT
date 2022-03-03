@@ -25,7 +25,7 @@ class Get_Free(object):
         self.base_url     = re.match(r'http.*/', rss_url).group()
         self.send_notify  = Send_Notify()
         self.hr_re_rule   = r'<img class="hitandrun"'
-        self.log          = Logger(file_name=self.log_file, level=self.log_level, when='H', backCount=5, interval=6)
+        self.log          = Logger(file_name=self.log_file, level=self.log_level, when='D', backCount=5, interval=1)
 
         self.free_dict    = {
             'free'            : '免费',

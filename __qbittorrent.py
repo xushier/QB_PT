@@ -349,7 +349,7 @@ class Client(object):
                 t_compon    = timestamp_to_date(h['completion_date'])
                 notify_data = notify_data + "删除 - 添加于：{}\n大小：{} GB - 已上传：{} GB - 分享率：{}\n做种时间：{}小时 - 完成于：{}\n\n".format(t_addon,t_size,t_uploaded,t_ratio,t_seedtime,t_compon)
                 time.sleep(delay)
-            self.send_notify.pushplus("删种结果", notify_data)
+            self.send_notify.pushplus("本次删除 {} 个种子".format(len(final_hashes)), notify_data)
             self.log.info(final_hashes)
             return final_hashes
         else:

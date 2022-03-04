@@ -239,9 +239,10 @@ class Client(object):
         else:
             hashes = {"urls": link, "upLimit": mbytes_to_bytes(uplimit, return_type='str'), "dlLimit": mbytes_to_bytes(dllimit, return_type='str'), "savepath": savepath, "category": category, "paused": paused}
         connections = self.sync_main_data()['server_state']['total_peer_connections']
-        if connections > 1000:
-            self.log.warning("QB 总连接用户数为 {}，超过 1000，不添加种子".format(connections))
-            self.send_notify("连接数过多，不添加种子", "QB 总连接用户数为 {}".format(connections))
+        dl_account  = self.get_torrents_amount()[0]
+        if connections > 1000 and dl_account > 9 :
+            self.log.warning("QB 总连接用户数为 {}，超过 1000，下载中的种子数 {}，不添加种子".format(connections,dl_account))
+            self.send_notify("连接数过多，不添加种子", "QB 总连接用户数为 {}，下载中的种子数 {}".format(connections,dl_account))
             return
         add_torrents = self.session.post(self.url + 'torrents/add', data=hashes)
         if add_torrents.status_code == 200:
@@ -304,7 +305,7 @@ class Client(object):
             self.log.info("当前时间：{}点，无需删种".format(time_now))
             sys.exit(0)
 
-        if free_space >= 500 and speed_ratio < 3 and all_account < 30 and dl_account < 15:
+        if free_space >= 500 and speed_ratio < 3 and all_account < 30 and dl_account < 10:
             self.log.info("可用空间：{} GB，速度比：{}，种子数量：{}，下载数量：{}，无需删种".format(free_space,speed_ratio,all_account,dl_account))
             sys.exit(0)
         else:

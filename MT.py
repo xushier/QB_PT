@@ -5,18 +5,18 @@
 定时
 cron: 30 0/3 * * * *
 任务名称
-new Env('M-TEAM 刷流');
+new Env('MTEAM 刷流');
 
 变量
-export M-TEAM_COOKIE=""
-export M-TEAM_RSS_URL=""
-export M-TEAM_CONFIG=""
+export MTEAM_COOKIE=""
+export MTEAM_RSS_URL=""
+export MTEAM_CONFIG=""
 '''
 import sys,re,os
 from __qbittorrent import Client
 from __get_free import Get_Free
 
-site = 'M-TEAM'
+site = 'MTEAM'
 site_lower = site.lower()
 
 config = {
@@ -35,13 +35,13 @@ for n in config:
         config[n] = v
 
 if not config[site + '_COOKIE']:
-    print("请检查 M-TEAM_COOKIE 变量是否设置！")
+    print("请检查 MTEAM_COOKIE 变量是否设置！")
     sys.exit(1)
 if not config[site + '_RSS_URL']:
-    print("请检查 M-TEAM_RSS_URL 变量是否设置！")
+    print("请检查 MTEAM_RSS_URL 变量是否设置！")
     sys.exit(1)
 if not config[site + '_COOKIE']:
-    print("请检查 M-TEAM_CONFIG 变量是否设置！设置举例，5-200-25，即筛选5到200G大小的种子，并且设置上传限速25M")
+    print("请检查 MTEAM_CONFIG 变量是否设置！设置举例，5-200-25，即筛选5到200G大小的种子，并且设置上传限速25M")
     sys.exit(1)
 
 site_config = re.split('-', config[site + '_CONFIG'])

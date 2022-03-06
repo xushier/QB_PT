@@ -325,6 +325,7 @@ class Client(object):
                 progress                   = int(tr['progress']*100)
                 num_leechs, num_seeds      = tr['num_leechs'], tr['num_seeds']
                 dlspeed, upspeed, uploaded = tr['dlspeed'], tr['upspeed'], bytes_to_gbytes(tr['uploaded'])
+                num_incomplete, time_active= tr['num_incomplete'], tr['time_active']
                 if state != 'downloading':
                     seed_time = round(((time.time() - tr['completion_on']) / 3600),2)
 
@@ -335,8 +336,14 @@ class Client(object):
                     self.log.info("删除确认第{}次 - 上传中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
                     names['hashes' + str(i)].add(hashcode)
                 # if state == 'downloading' and dlspeed > 20*1048576 and dlspeed / upspeed >= 3 and progress > 15:
-                if state == 'downloading' and ratio < 0.12 and dlspeed / upspeed >= 5 and progress > 15:
+                if state == 'downloading' and ratio < 0.12 and dlspeed >= ( upspeed*5 ) and progress > 15 and time_active > 500:
                     self.log.info("删除确认第{}次 - 下载中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
+                    names['hashes' + str(i)].add(hashcode)
+                if state == 'downloading' and ratio < 0.12 and dlspeed >= ( upspeed*5 ) and num_incomplete < 20 and time_active > 500:
+                    self.log.info("删除确认第{}次 - 下载中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
+                    names['hashes' + str(i)].add(hashcode)
+                if state == 'stalledDL' and ratio < 0.12 and dlspeed >= ( upspeed*5 ) and num_incomplete < 20 and time_active > 500:
+                    self.log.info("删除确认第{}次 - 等待中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
                     names['hashes' + str(i)].add(hashcode)
             time.sleep(delay)
 

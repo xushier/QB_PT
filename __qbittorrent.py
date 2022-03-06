@@ -334,7 +334,8 @@ class Client(object):
                 if state == 'uploading' and ( ratio >= 2 or seed_time > 24 ) and upspeed < 600*1024 and num_leechs < 5:
                     self.log.info("删除确认第{}次 - 上传中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
                     names['hashes' + str(i)].add(hashcode)
-                if state == 'downloading' and dlspeed > 20*1048576 and dlspeed / upspeed >= 3 and progress > 15:
+                # if state == 'downloading' and dlspeed > 20*1048576 and dlspeed / upspeed >= 3 and progress > 15:
+                if state == 'downloading' and ratio < 0.12 and dlspeed / upspeed >= 5 and progress > 15:
                     self.log.info("删除确认第{}次 - 下载中 - {} - 大小：{} - 已上传：{} GB - 分享率：{} - 完成于：{} - ({})".format(i,category,size,uploaded,ratio,completion_on,name))
                     names['hashes' + str(i)].add(hashcode)
             time.sleep(delay)

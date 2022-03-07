@@ -20,7 +20,7 @@ qb_config = {
     'PASSWORD': '',
     'FILTER_FILTER': 'all',
     'FILTER_SORT': 'added_on',
-    'FILTER_LIMIT': 30,
+    'FILTER_LIMIT': 50,
     'FILTER_REVERSE': 'False',
     'FILTER_TIMES': 3,
     'DELAY': 5,

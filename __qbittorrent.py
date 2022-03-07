@@ -40,7 +40,7 @@ filter_sort    = qb_config['FILTER_SORT']
 filter_reverse = qb_config['FILTER_REVERSE']
 filter_times   = qb_config['FILTER_TIMES']
 delay          = qb_config['DELAY']
-max_delete     = qb_config['MAX_DELETE']
+max_delete     = int(qb_config['MAX_DELETE'])
 
 #######################################
 

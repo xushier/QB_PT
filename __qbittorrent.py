@@ -35,11 +35,11 @@ for n in qb_config:
 ###############其他参数################
 
 filter_filter  = qb_config['FILTER_FILTER']
-filter_limit   = qb_config['FILTER_LIMIT']
+filter_limit   = int(qb_config['FILTER_LIMIT'])
 filter_sort    = qb_config['FILTER_SORT']
 filter_reverse = qb_config['FILTER_REVERSE']
-filter_times   = qb_config['FILTER_TIMES']
-delay          = qb_config['DELAY']
+filter_times   = int(qb_config['FILTER_TIMES'])
+delay          = int(qb_config['DELAY'])
 max_delete     = int(qb_config['MAX_DELETE'])
 
 #######################################

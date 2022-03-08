@@ -28,6 +28,7 @@ class Get_Free(object):
 
         size = os.path.getsize(self.log_file)
         if size > 100000:
+            print("日志大小超过 100K，清空")
             with open(self.log_file, "w+") as f:
                 f.writelines('')
         self.log          = Logger(file_name=self.log_file, level=self.log_level, when='D', backCount=5, interval=1)

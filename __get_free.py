@@ -25,6 +25,11 @@ class Get_Free(object):
         self.base_url     = re.match(r'http.*/', rss_url).group()
         self.send_notify  = Send_Notify()
         self.hr_re_rule   = r'<img class="hitandrun"'
+
+        size = os.path.getsize(self.log_file)
+        if size > 100000:
+            with open(self.log_file, "w+") as f:
+                f.writelines('')
         self.log          = Logger(file_name=self.log_file, level=self.log_level, when='D', backCount=5, interval=1)
 
         self.free_dict    = {
@@ -49,7 +54,7 @@ class Get_Free(object):
         login          = session_try.get(self.base_url, verify=self.verify, timeout=self.timeout, headers=self.host_referer)
         if re.search('login.php', login.text):
             self.log.warning("登录已失效，请更新Cookie！")
-            self.send_notify.pushplus('登录失效！','登录已失效，请更新Cookie！')
+            self.send_notify.wechat('登录失效！','登录已失效，请更新Cookie！')
             sys.exit(1)
         else:
             self.log.info('Cookie有效')
@@ -114,7 +119,7 @@ class Get_Free(object):
             req_detail_url.encoding = 'utf-8'
             if re.search('未登录!', req_detail_url.text):
                 self.log.warning("登录已失效，请更新Cookie！")
-                self.send_notify.pushplus('站点登录失效！','登录已失效，请更新Cookie！')
+                self.send_notify.wechat('站点登录失效！','登录已失效，请更新Cookie！')
                 sys.exit(1)
 
             # 获取种子的促销指定状态，若非指定状态则退出本次循环
@@ -160,7 +165,7 @@ class Get_Free(object):
 
         if len(free_list):
             self.log.info("本次运行满足条件的种子有 {} 个，下载链接：{}".format(len(free_list),free_list))
-            self.send_notify.pushplus("添加 {} 种子，共 {} 个".format(category,len(free_list)), notify_data)
+            self.send_notify.wechat("添加 {} 种子，共 {} 个".format(category,len(free_list)), notify_data)
             return(free_list)
         else:
             self.log.info("没有符合条件的种子")

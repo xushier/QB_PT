@@ -4,9 +4,10 @@
 '''
 变量
 export PUSH_PLUS_TOKEN=""
+export QYWX="" #以英文逗号分割，顺序是 corpid,corpsecret,touser,agentid （企业ID，企业密钥，用户ID，客户端ID）
 '''
 
-import requests,os
+import requests,os,re
 
 push_config = {
     'HITOKOTO': False,                  # 启用一言（随机句子）
@@ -38,7 +39,7 @@ push_config = {
     'QMSG_KEY': '',                     # qmsg 酱的 QMSG_KEY
     'QMSG_TYPE': '',                    # qmsg 酱的 QMSG_TYPE
 
-    'QYWX_AM': '',                      # 企业微信应用
+    'QYWX': '',                      # 企业微信应用
 
     'QYWX_KEY': '',                     # 企业微信机器人
 
@@ -73,10 +74,100 @@ class Send_Notify(object):
         else:
             print("通知发送失败！")
 
+    def wechat(self, title: str, content: str) -> None:
+        """
+        通过 企业微信 APP 推送消息。
+        """
+        if not push_config.get("QYWX"):
+            print("QYWX 未设置!!\n取消推送")
+            return
+        QYWX_AY = re.split(",", push_config.get("QYWX"))
+        if 4 < len(QYWX_AY) > 5:
+            print("QYWX 设置错误!!\n取消推送")
+            return
+        print("企业微信 APP 服务启动")
 
+        corpid = QYWX_AY[0]
+        corpsecret = QYWX_AY[1]
+        touser = QYWX_AY[2]
+        agentid = QYWX_AY[3]
+        try:
+            media_id = QYWX_AY[4]
+        except IndexError:
+            media_id = ""
+        wx = We_Com(corpid, corpsecret, agentid)
+        # 如果没有配置 media_id 默认就以 text 方式发送
+        if not media_id:
+            message = title + "\n\n" + content
+            response = wx.send_text(message, touser)
+        else:
+            response = wx.send_mpnews(title, content, media_id, touser)
 
-    def wechat(self, title:str, content:str) -> None:
-        pass
+        if response == "ok":
+            print("企业微信推送成功！")
+        else:
+            print("企业微信推送失败！错误信息如下：\n", response)
 
-    def iyuu(self, title:str, content:str) -> None:
-        pass
+        def iyuu(self, title:str, content:str) -> None:
+            pass
+
+class We_Com(object):
+    def __init__(self, corpid, corpsecret, agentid):
+        self.CORPID = corpid
+        self.CORPSECRET = corpsecret
+        self.AGENTID = agentid
+
+    def get_access_token(self):
+        url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken"
+        values = {
+            "corpid": self.CORPID,
+            "corpsecret": self.CORPSECRET,
+        }
+        req = requests.post(url, params=values)
+        data = json.loads(req.text)
+        return data["access_token"]
+
+    def send_text(self, message, touser="@all"):
+        send_url = (
+            "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token="
+            + self.get_access_token()
+        )
+        send_values = {
+            "touser": touser,
+            "msgtype": "text",
+            "agentid": self.AGENTID,
+            "text": {"content": message},
+            "safe": "0",
+        }
+        send_msges = bytes(json.dumps(send_values), "utf-8")
+        respone = requests.post(send_url, send_msges)
+        respone = respone.json()
+        return respone["errmsg"]
+
+    def send_mpnews(self, title, message, media_id, touser="@all"):
+        send_url = (
+            "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token="
+            + self.get_access_token()
+        )
+        send_values = {
+            "touser": touser,
+            "msgtype": "mpnews",
+            "agentid": self.AGENTID,
+            "mpnews": {
+                "articles": [
+                    {
+                        "title": title,
+                        "thumb_media_id": media_id,
+                        "author": "Author",
+                        "content_source_url": "",
+                        "content": message.replace("\n", "<br/>"),
+                        "digest": message,
+                    }
+                ]
+            },
+        }
+        send_msges = bytes(json.dumps(send_values), "utf-8")
+        respone = requests.post(send_url, send_msges)
+        respone = respone.json()
+        return respone["errmsg"]
+

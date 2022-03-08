@@ -7,7 +7,7 @@ export PUSH_PLUS_TOKEN=""
 export QYWX="" #以英文逗号分割，顺序是 corpid,corpsecret,touser,agentid （企业ID，企业密钥，用户ID，客户端ID）
 '''
 
-import requests,os,re
+import requests,os,re,json
 
 push_config = {
     'HITOKOTO': False,                  # 启用一言（随机句子）

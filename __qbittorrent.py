@@ -25,6 +25,8 @@ qb_config = {
     'FILTER_TIMES': 3,
     'DELAY': 5,
     'MAX_DELETE': 3,
+    'MIN_HOUR': 2,
+    'MAX_HOUR': 5,
 }
 
 for n in qb_config:
@@ -41,6 +43,8 @@ filter_reverse = qb_config['FILTER_REVERSE']
 filter_times   = int(qb_config['FILTER_TIMES'])
 delay          = int(qb_config['DELAY'])
 max_delete     = int(qb_config['MAX_DELETE'])
+min_hour       = int(qb_config['MIN_HOUR'])
+max_hour       = int(qb_config['MAX_HOUR'])
 
 #######################################
 
@@ -286,7 +290,7 @@ class Client(object):
     def get_torrents_amount(self):
         return len(self.filter_torrents(filter='downloading')),len(self.filter_torrents(filter='all'))
 
-    def get_satisfied_torrents(self,limit=filter_limit,filter=filter_filter,sort=filter_sort,reverse=filter_reverse,delay=delay,filter_times=filter_times,max_delete=max_delete) -> list:
+    def get_satisfied_torrents(self,limit=filter_limit,filter=filter_filter,sort=filter_sort,reverse=filter_reverse,delay=delay,filter_times=filter_times,max_delete=max_delete,min_hour=min_hour,max_hour=max_hour) -> list:
         dl_account    = self.get_torrents_amount()[0]
         all_account   = self.get_torrents_amount()[1]
         free_space    = bytes_to_gbytes(self.sync_main_data()['server_state']['free_space_on_disk'])
@@ -298,7 +302,7 @@ class Client(object):
         speed_ratio   = round(dl_gb_speed/up_gb_speed,2)
         time_now      = time.localtime().tm_hour
 
-        if 9 <= time_now <= 23:
+        if min_hour <= time_now <= max_hour:
             self.log.info("当前时间：{}点，可以删种".format(time_now))
             notify_data  = "当前时间：{}点\n".format(time_now)
         else:

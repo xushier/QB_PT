@@ -302,7 +302,7 @@ class Client(object):
         speed_ratio   = round(dl_gb_speed/up_gb_speed,2)
         time_now      = time.localtime().tm_hour
 
-        if min_hour <= time_now <= max_hour:
+        if max_hour <= time_now or time_now < min_hour:
             self.log.info("当前时间：{}点，可以删种".format(time_now))
             notify_data  = "当前时间：{}点\n".format(time_now)
         else:

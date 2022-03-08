@@ -54,7 +54,8 @@ run_log     = config[site + '_RUN_LOG']
 temp_log    = config[site + '_TEMP_LOG']
 cookie      = config[site + '_COOKIE']
 rss_url     = config[site + '_RSS_URL']
+rss_re_rule = r'<item><title>(.*)<\/title>[\s\S]*?<link>(.*\.php\?id=\d+)<\/link>[\s\S]*?<enclosure url="(.*)" length="(.*)" type.*[\s\S]*?<guid isPermaLink="false">(.*)<\/guid>[\s\S]*?<pubDate>(.*)<\/pubDate>'
 
-free_torrents = Get_Free(cookie, rss_url, run_log).get_free_torrents(temp_log, category, min_size=min_size, max_size=max_size, filter_hr=False, filter_free=False)
+free_torrents = Get_Free(cookie, rss_url, run_log).get_free_torrents(temp_log, category, min_size=min_size, max_size=max_size, filter_hr=False, filter_free=False, rss_re_rule=rss_re_rule)
 qb = Client()
 qb.add_torrents_from_link(free_torrents, up_limit, save_path, category)

@@ -64,6 +64,12 @@ class Client(object):
         """
 
         self.send_notify = Send_Notify()
+
+        size = os.path.getsize(log_file_name)
+        if size > 100000:
+            print("QB 运行日志大小超过 100K，清空")
+            with open(log_file_name, "w+") as f:
+                f.writelines('')
         self.log         = Logger(file_name=log_file_name, level='info', when='D', backCount=5, interval=1)
 
         if not qb_config.get("QB_URL"):

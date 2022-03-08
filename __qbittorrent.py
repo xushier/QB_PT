@@ -365,7 +365,7 @@ class Client(object):
                 t_seedtime  = round(h['seeding_time'] / 3600, 2)
                 t_addon     = timestamp_to_date(h['addition_date'])
                 t_compon    = timestamp_to_date(h['completion_date'])
-                notify_data = notify_data + "删除 - 添加于：{}\n大小：{} GB - 已上传：{} GB - 分享率：{}\n做种时间：{}小时 - 完成于：{}\n\n".format(t_addon,t_size,t_uploaded,t_ratio,t_seedtime,t_compon)
+                notify_data = notify_data + "删除种子\n添加于：{}\n完成于：{}\n大小：{} GB - 已上传：{} GB\n分享率：{} - 做种时间：{} 小时\n\n".format(t_addon,t_compon,t_size,t_uploaded,t_ratio,t_seedtime)
                 time.sleep(delay)
             self.send_notify.wechat("本次删除 {} 个种子".format(len(final_hashes)), notify_data)
             self.log.info(final_hashes)

@@ -10,6 +10,7 @@ from __shift import *
 
 rss_re_rule  = r'<title><!\[CDATA\[(.*)\]\]><\/title>[\s\S]*?<link>(.*\.php\?id=\d+)<\/link>[\s\S]*?<enclosure url="(.*)" length="(.*)" type.*[\s\S]*?<guid isPermaLink="false">(.*)<\/guid>[\s\S]*?<pubDate>(.*)<\/pubDate>'
 free_re_rule = r'<font class=\'(free|twoup|twouphalfdown|twoupfree)\''
+hr_re_rule   = r'<img class="hitandrun"'
 
 #######################################
 
@@ -24,7 +25,6 @@ class Get_Free(object):
         self.timeout      = (5.05,20)
         self.base_url     = re.match(r'http.*/', rss_url).group()
         self.send_notify  = Send_Notify()
-        self.hr_re_rule   = r'<img class="hitandrun"'
 
         if os.path.isfile(self.log_file):
             size = os.path.getsize(self.log_file)
@@ -62,7 +62,7 @@ class Get_Free(object):
             self.log.info('Cookie有效')
             self.session = session_try
 
-    def get_free_torrents(self, temp_file, category, min_size=15, max_size=800, filter_free=True, filter_hr=True, filter_old=True, delay=1, allow_time=10, rss_nums=15, rss_time=3, time_format='%a, %d %b %Y %H:%M:%S +0800', rss_re_rule=rss_re_rule, free_re_rule=free_re_rule) -> list:
+    def get_free_torrents(self, temp_file, category, min_size=15, max_size=800, filter_free=True, filter_hr=True, filter_old=True, delay=1, allow_time=10, rss_nums=15, rss_time=3, time_format='%a, %d %b %Y %H:%M:%S +0800', rss_re_rule=rss_re_rule, free_re_rule=free_re_rule, hr_re_rule=hr_re_rule) -> list:
         free_list   = []
         notify_data = ""
         rss_req     = self.session.get(self.rss_url, headers=self.host_referer)
@@ -135,11 +135,14 @@ class Get_Free(object):
 
             # 获取种子的 HR 状态，若为 HR 状态则退出本次循环
             if filter_hr:
-                hr_info = re.search(self.hr_re_rule,req_detail_url.text)
-                if hr_info != None:
+                hr_info = re.search(hr_re_rule,req_detail_url.text)
+                if hr_info != None and category != 'chdbits':
                     self.log.info("跳过：{} - 原因：HR 种子 - 链接：{}".format(name,detail_url))
                     continue
-                self.log.info("HR 符合要求：{} - 非 HR - 链接：{}".format(name,detail_url))
+                elif hr_info != None and category == 'chdbits':
+                    self.log.info("CHD HR 种子：{} - 做种期限：{} - 链接：{}".format(name,hr_info.group(1),detail_url))
+                else:
+                    self.log.info("HR 符合要求：{} - 非 HR - 链接：{}".format(name,detail_url))
 
             # 判断种子大小是否满足筛选条件，若不满足则退出本次循环
             if max_size <= gbytes or gbytes <= min_size:

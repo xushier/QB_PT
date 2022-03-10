@@ -55,7 +55,8 @@ temp_log     = config[site + '_TEMP_LOG']
 cookie       = config[site + '_COOKIE']
 rss_url      = config[site + '_RSS_URL']
 free_re_rule = r'<img class="(pro_free|pro_2up|pro_50pctdown2up|pro_free2up|pro_30pctdown)" src='
+hr_re_rule   = r'<b>H&R:&nbsp;<\/b>(.*)<\/td>'
 
-free_torrents = Get_Free(cookie, rss_url, run_log).get_free_torrents(temp_log, category, min_size=min_size, max_size=max_size, free_re_rule=free_re_rule)
+free_torrents = Get_Free(cookie, rss_url, run_log).get_free_torrents(temp_log, category, min_size=min_size, max_size=max_size, free_re_rule=free_re_rule, hr_re_rule=hr_re_rule)
 qb = Client()
 qb.add_torrents_from_link(free_torrents, up_limit, save_path, category)

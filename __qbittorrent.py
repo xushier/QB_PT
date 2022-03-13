@@ -338,10 +338,10 @@ class Client(object):
                 num_leechs, num_seeds      = tr['num_leechs'], tr['num_seeds']
                 dlspeed, upspeed, uploaded = tr['dlspeed'], tr['upspeed'], bytes_to_gbytes(tr['uploaded'])
                 num_incomplete, time_active= tr['num_incomplete'], tr['time_active']
-                st = int((time.time() - tr['completion_on']) / 3600)
-                if category == 'chdbits' or category == None:
-                    if st < 120:
-                        continue
+                # st = int((time.time() - tr['completion_on']) / 3600)
+                # if category == 'chdbits' or category == None:
+                #     if st < 120:
+                #         continue
                 if state != 'downloading':
                     seed_time = round(((time.time() - tr['completion_on']) / 3600),2)
                 if state == 'stalledUP' and ( ratio >= 2 or seed_time > 24 ) and num_leechs < 5:

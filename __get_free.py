@@ -139,8 +139,8 @@ class Get_Free(object):
                 if hr_info != None and category != 'chdbits':
                     self.log.info("跳过：{} - 原因：HR 种子 - 链接：{}".format(name,detail_url))
                     continue
-                elif hr_info != None and category == 'chdbits':
-                    self.log.info("CHD HR 种子：{} - 做种期限：{} - 链接：{}".format(name,hr_info.group(1),detail_url))
+                # elif hr_info != None and category == 'chdbits':
+                #     self.log.info("CHD HR 种子：{} - 做种期限：{} - 链接：{}".format(name,hr_info.group(1),detail_url))
                 else:
                     self.log.info("HR 符合要求：{} - 非 HR - 链接：{}".format(name,detail_url))
 

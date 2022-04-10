@@ -170,7 +170,7 @@ class Get_Free(object):
 
         if len(free_list):
             self.log.info("本次运行满足条件的种子有 {} 个，下载链接：{}".format(len(free_list),free_list))
-            self.send_notify.wechat("添加 {} 种子，共 {} 个".format(category,len(free_list)), notify_data)
+            self.send_notify.wechat("青龙刷流脚本\n添加 {} 种子，共 {} 个".format(category,len(free_list)), notify_data)
             return(free_list)
         else:
             self.log.info("没有符合条件的种子")
